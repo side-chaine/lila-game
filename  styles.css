@@ -1,0 +1,60 @@
+body {
+    background-color: white; /* Белый фон */
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex; /* Используем flexbox для компоновки */
+}
+
+.video-block {
+    width: 25%; /* Фиксированная ширина для блоков видео */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.game-board {
+    width: 50%; /* Ширина игрового поля */
+    position: relative;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 9 столбцов */
+    grid-template-rows: repeat(8, 1fr); /* 8 строк */
+    gap: 1px; /* Промежутки между клетками */
+    background-color: black; /* Цвет границ клеток */
+}
+
+.cell {
+    width: 100%;
+    height: 100%;
+    background-image: url('images/maket.png'); /* Фоновое изображение сетки */
+    background-size: cover; /* Растягиваем изображение под размер клетки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Цвет текста */
+    font-size: 12px; /* Размер шрифта для номеров клеток */
+}
+
+.player {
+    position: absolute;
+    width: 20px; /* Диаметр фишки */
+    height: 20px;
+    background-color: red; /* Цвет фишки */
+    border-radius: 50%; /* Круглая форма фишки */
+    transition: transform 0.5s; /* Плавное движение фишки */
+}
+
+.message {
+    margin-top: 10px; /* Отступ для сообщения */
+    font-size: 16px; /* Размер шрифта для сообщения */
+}
+
+button {
+    margin-top: 10px; /* Отступ для кнопки */
+    padding: 10px 20px; /* Отступы внутри кнопки */
+    font-size: 16px; /* Размер шрифта для кнопки */
+}

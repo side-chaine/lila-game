@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра Лиля</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+        }
+        
+        .game-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 20%;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar h2 {
+            margin: 0 0 15px 0;
+            color: #2c7873;
+        }
+        
+        .video-container {
+            flex: 1;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            margin-bottom: 20px;
+        }
+        
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .sidebar.right {
+            border-right: none;
+            border-left: 1px solid #ddd;
+        }
+        
+        .main-content {
+            width: 60%;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        
+        .board-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .game-board {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 2px solid #333;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .message {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            min-height: 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c7873;
+        }
+        
+        .player {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            border: 2px solid white;
+            z-index: 10;
+            transition: all 0.5s ease;
+            margin-left: -9px;
+            margin-top: -9px;
+        }
+        
+        @keyframes victory {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            25% { transform: scale(1.5) rotate(90deg); opacity: 0.8; }
+            50% { transform: scale(2) rotate(180deg); opacity: 0.6; }
+            75% { transform: scale(1.5) rotate(270deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        .victory-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #4CAF50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: victory 2s ease-in-out;
+            z-index: 1000;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            z-index: 999;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Левая боковая панель с видео ведущего -->
+        <div class="sidebar left">
+            <h2>Видео ведущего</h2>
+            <div class="video-container">
+                <iframe 
+                    src="https://meet.jit.si/lila-leader" 
+                    allow="camera; microphone" 
+                    frameborder="0"
+                ></iframe>
+            </div>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="main-content">
+            <div class="board-container">
+                <img class="game-board" src="images/maket.jpg" alt="Игровое поле Лиля">
+                <div class="player" id="player"></div>
+            </div>
+            
+            <div class="controls">
+                <div class="message" id="message">Бросьте кубик, чтобы начать игру</div>
+            <button id="rollButton">Бросить кубик</button>
+                <div id="result" style="margin-top: 10px;">Выпало: 0</div>
+            </div>
+        </div>
+        
+        <!-- Правая боковая панель с видео игрока -->
+        <div class="sidebar right">
+            <h2>Видео игрока</h2>
+            <div class="video-container">
+                <iframe 
+                    src="https://meet.jit.si/lila-player" 
+                    allow="camera; microphone" 
+                    frameborder="0"
+                ></iframe>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Звуки для змей -->
+    <audio id="snake1" src="sounds/snake1.mp3" preload="auto"></audio>
+    <audio id="snake2" src="sounds/snake2.mp3" preload="auto"></audio>
+    <audio id="snake3" src="sounds/snake3.mp3" preload="auto"></audio>
+    <audio id="snake4" src="sounds/snake4.mp3" preload="auto"></audio>
+    <audio id="snake5" src="sounds/snake5.mp3" preload="auto"></audio>
+    <audio id="snake6" src="sounds/snake6.mp3" preload="auto"></audio>
+    <audio id="snake7" src="sounds/snake7.mp3" preload="auto"></audio>
+    <audio id="snake8" src="sounds/snake8.mp3" preload="auto"></audio>
+    
+    <!-- Звуки для стрел -->
+    <audio id="up1" src="sounds/Up1.mp3" preload="auto"></audio>
+    <audio id="up2" src="sounds/Up2.mp3" preload="auto"></audio>
+    <audio id="up3" src="sounds/Up3.mp3" preload="auto"></audio>
+    <audio id="up4" src="sounds/Up4.mp3" preload="auto"></audio>
+    <audio id="up5" src="sounds/Up5.mp3" preload="auto"></audio>
+    <audio id="up6" src="sounds/Up6.mp3" preload="auto"></audio>
+    <audio id="up7" src="sounds/Up7.mp3" preload="auto"></audio>
+    <audio id="up8" src="sounds/Up8.mp3" preload="auto"></audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentPosition = 0;
+            const player = document.getElementById('player');
+            const rollButton = document.getElementById('rollButton');
+            const result = document.getElementById('result');
+            const message = document.getElementById('message');
+            let isFirstMove = true;
+            
+            // Функция для воспроизведения звука
+            function playSound(soundId) {
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.currentTime = 0; // Сброс времени воспроизведения
+                    sound.play().catch(error => {
+                        console.error('Ошибка воспроизведения звука:', error);
+                    });
+                } else {
+                    console.warn('Звук не найден:', soundId);
+                }
+            }
+            
+            const specialMoves = {
+                // Лестницы (взлеты)
+                10: 23, 17: 69, 20: 32, 27: 41, 28: 50, 37: 66, 45: 67, 54: 68,
+                
+                // Змеи (падения)
+                12: 8, 16: 4, 24: 7, 29: 6, 44: 9, 52: 35, 55: 3, 61: 13, 63: 2, 72: 51
+            };
+            
+            const cellCoordinates = {};
+            
+            function initCellCoordinates() {
+                cellCoordinates[0] = { x: 5, y: 95 };
+                
+                // Первый ряд (снизу)
+                cellCoordinates[1] = { x: 11, y: 91 };
+                cellCoordinates[2] = { x: 22, y: 91 };
+                cellCoordinates[3] = { x: 33, y: 91 };
+                cellCoordinates[4] = { x: 44, y: 91 };
+                cellCoordinates[5] = { x: 55, y: 91 };
+                cellCoordinates[6] = { x: 66, y: 91 };
+                cellCoordinates[7] = { x: 77, y: 91 };
+                cellCoordinates[8] = { x: 88, y: 91 };
+                cellCoordinates[9] = { x: 99, y: 91 };
+                
+                // Второй ряд
+                cellCoordinates[10] = { x: 99, y: 79 };
+                cellCoordinates[11] = { x: 88, y: 79 };
+                cellCoordinates[12] = { x: 77, y: 79 };
+                cellCoordinates[13] = { x: 66, y: 79 };
+                cellCoordinates[14] = { x: 55, y: 79 };
+                cellCoordinates[15] = { x: 44, y: 79 };
+                cellCoordinates[16] = { x: 33, y: 79 };
+                cellCoordinates[17] = { x: 22, y: 79 };
+                cellCoordinates[18] = { x: 11, y: 79 };
+                
+                // Третий ряд
+                cellCoordinates[19] = { x: 11, y: 67 };
+                cellCoordinates[20] = { x: 22, y: 67 };
+                cellCoordinates[21] = { x: 33, y: 67 };
+                cellCoordinates[22] = { x: 44, y: 67 };
+                cellCoordinates[23] = { x: 55, y: 67 };
+                cellCoordinates[24] = { x: 66, y: 67 };
+                cellCoordinates[25] = { x: 77, y: 67 };
+                cellCoordinates[26] = { x: 88, y: 67 };
+                cellCoordinates[27] = { x: 99, y: 67 };
+                
+                // Четвертый ряд
+                cellCoordinates[28] = { x: 99, y: 55 };
+                cellCoordinates[29] = { x: 88, y: 55 };
+                cellCoordinates[30] = { x: 77, y: 55 };
+                cellCoordinates[31] = { x: 66, y: 55 };
+                cellCoordinates[32] = { x: 55, y: 55 };
+                cellCoordinates[33] = { x: 44, y: 55 };
+                cellCoordinates[34] = { x: 33, y: 55 };
+                cellCoordinates[35] = { x: 22, y: 55 };
+                cellCoordinates[36] = { x: 11, y: 55 };
+                
+                // Пятый ряд
+                cellCoordinates[37] = { x: 11, y: 43 };
+                cellCoordinates[38] = { x: 22, y: 43 };
+                cellCoordinates[39] = { x: 33, y: 43 };
+                cellCoordinates[40] = { x: 44, y: 43 };
+                cellCoordinates[41] = { x: 55, y: 43 };
+                cellCoordinates[42] = { x: 66, y: 43 };
+                cellCoordinates[43] = { x: 77, y: 43 };
+                cellCoordinates[44] = { x: 88, y: 43 };
+                cellCoordinates[45] = { x: 99, y: 43 };
+                
+                // Шестой ряд
+                cellCoordinates[46] = { x: 99, y: 31 };
+                cellCoordinates[47] = { x: 88, y: 31 };
+                cellCoordinates[48] = { x: 77, y: 31 };
+                cellCoordinates[49] = { x: 66, y: 31 };
+                cellCoordinates[50] = { x: 55, y: 31 };
+                cellCoordinates[51] = { x: 44, y: 31 };
+                cellCoordinates[52] = { x: 33, y: 31 };
+                cellCoordinates[53] = { x: 22, y: 31 };
+                cellCoordinates[54] = { x: 11, y: 31 };
+                
+                // Седьмой ряд
+                cellCoordinates[55] = { x: 11, y: 19 };
+                cellCoordinates[56] = { x: 22, y: 19 };
+                cellCoordinates[57] = { x: 33, y: 19 };
+                cellCoordinates[58] = { x: 44, y: 19 };
+                cellCoordinates[59] = { x: 55, y: 19 };
+                cellCoordinates[60] = { x: 66, y: 19 };
+                cellCoordinates[61] = { x: 77, y: 19 };
+                cellCoordinates[62] = { x: 88, y: 19 };
+                cellCoordinates[63] = { x: 99, y: 19 };
+                
+                // Восьмой ряд (верхний)
+                cellCoordinates[64] = { x: 99, y: 7 };
+                cellCoordinates[65] = { x: 88, y: 7 };
+                cellCoordinates[66] = { x: 77, y: 7 };
+                cellCoordinates[67] = { x: 66, y: 7 };
+                cellCoordinates[68] = { x: 55, y: 7 };
+                cellCoordinates[69] = { x: 44, y: 7 };
+                cellCoordinates[70] = { x: 33, y: 7 };
+                cellCoordinates[71] = { x: 22, y: 7 };
+                cellCoordinates[72] = { x: 11, y: 7 };
+            }
+            
+            function positionPlayer(cellNumber) {
+                if (!cellCoordinates[cellNumber]) {
+                    console.error('Неверный номер клетки:', cellNumber);
+                    return;
+                }
+                
+                const coords = cellCoordinates[cellNumber];
+                player.style.left = coords.x + '%';
+                player.style.top = coords.y + '%';
+            }
+            
+            function rollDice() {
+                return Math.floor(Math.random() * 6) + 1;
+            }
+            
+            function movePawn(position) {
+                return specialMoves[position] || position;
+            }
+            
+            function showVictoryAnimation() {
+                const overlay = document.createElement('div');
+                overlay.className = 'victory-overlay';
+                document.body.appendChild(overlay);
+                
+                const victoryText = document.createElement('div');
+                victoryText.className = 'victory-text';
+                victoryText.textContent = 'Поздравляем! Вы победили!';
+                document.body.appendChild(victoryText);
+                
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                    document.body.removeChild(victoryText);
+                    resetGame();
+                }, 3000);
+            }
+            
+            function resetGame() {
+                currentPosition = 0;
+                isFirstMove = true;
+                positionPlayer(0);
+                message.textContent = 'Бросьте кубик, чтобы начать новую игру';
+                result.textContent = 'Выпало: 0';
+                rollButton.disabled = false;
+            }
+            
+            // Обработчик клика по кнопке
+            rollButton.addEventListener('click', function() {
+                rollButton.disabled = true;
+                
+                const diceResult = rollDice();
+                result.textContent = 'Выпало: ' + diceResult;
+                
+                let newPosition = currentPosition + diceResult;
+                
+                if (newPosition === 72) {
+                    message.textContent = 'Змея! С клетки 72 на клетку 51';
+                    positionPlayer(72);
+                    playSound('snake' + Math.floor(Math.random() * 8 + 1)); // Воспроизведение случайного звука змеи
+                    setTimeout(() => {
+                        currentPosition = 51;
+                        positionPlayer(51);
+                        rollButton.disabled = false;
+                    }, 1000);
+                    return;
+                } else if (newPosition > 72) {
+                    message.textContent = 'Поздравляем! Вы достигли просветления!';
+                    showVictoryAnimation();
+                    return;
+                }
+                
+                currentPosition = newPosition;
+                message.textContent = 'Вы на клетке ' + currentPosition;
+                positionPlayer(currentPosition);
+                
+                setTimeout(function() {
+                    const oldPosition = currentPosition;
+                    currentPosition = movePawn(currentPosition);
+                    
+                    if (currentPosition !== oldPosition) {
+                        if (currentPosition > oldPosition) {
+                            message.textContent = 'Взлёт! С клетки ' + oldPosition + ' на клетку ' + currentPosition;
+                            playSound('up' + Math.floor(Math.random() * 8 + 1)); // Воспроизведение случайного звука стрелы
+                        } else {
+                            message.textContent = 'Змея! С клетки ' + oldPosition + ' на клетку ' + currentPosition;
+                            playSound('snake' + Math.floor(Math.random() * 8 + 1)); // Воспроизведение случайного звука змеи
+                        }
+                        
+                        setTimeout(function() {
+                            positionPlayer(currentPosition);
+                            rollButton.disabled = false;
+                        }, 800);
+                    } else {
+                        rollButton.disabled = false;
+                    }
+                }, 1000);
+            });
+            
+            // Инициализация игры
+            initCellCoordinates();
+            currentPosition = 0;
+            positionPlayer(0);
+            
+            player.style.width = '18px';
+            player.style.height = '18px';
+            player.style.marginLeft = '-9px';
+            player.style.marginTop = '-9px';
+            
+            console.log('Игра инициализирована. Нажмите кнопку "Бросить кубик", чтобы начать игру.');
+        });
+    </script>
+</body>
+</html>
