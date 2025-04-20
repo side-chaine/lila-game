@@ -122,9 +122,10 @@
                 
                 <!-- Заменяем 3D кубик на текстовый с текстом в нижнем регистре -->
                 <div class="dice-container">
-                    <div id="game-dice" class="text-dice click-invite">
+                    <div id="dice" class="text-dice click-invite">
                         <span class="click-text">click</span>
                     </div>
+                    <div id="six-counter" style="display:none;"></div>
                 </div>
                 
                 <!-- Добавляем БОК справа от игрового поля с приветственным текстом -->
@@ -139,7 +140,7 @@
                 </div>
             </div>
             
-            <div class="message">Бросьте кубик, чтобы начать игру</div>
+            <div id="message"></div>
         </div>
         
         <!-- Add video container for the player (right side) -->
