@@ -1,0 +1,5948 @@
+body {
+    background-color: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    margin-top: -1cm; /* Добавляем отрицательный отступ сверху на 1 сантиметр */
+}
+
+.game-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start; /* Align items at the top */
+}
+
+.sidebar {
+    width: 20%;
+    background: rgba(20, 22, 26, 0.95);
+}
+
+.main-content {
+    width: 34%; /* Reduced from 60% to make room for video containers */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.game-board {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.message {
+    margin-top: 20px;
+    color: white;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* Базовые стили для кнопок и других элементов управления */
+button {
+    margin-top: 15px;
+    padding: 10px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#result {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Стили для стрелок и змей можно добавить позже */ 
+
+/* Новый контейнер для макета */
+.maket-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 20px auto;
+    border: 2px solid green; /* Отладочная рамка */
+}
+
+/* Стиль для изображения макета */
+#maket {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 2px solid black;
+    background-color: #f8f8f8; /* Фоновый цвет, чтобы было видно, где должно быть изображение */
+}
+
+/* Обновляем стили для контейнера игрового поля */
+.board-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.game-board {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Контейнеры для элементов */
+.snakes-container,
+.arrows-container,
+.glowing-elements-container,
+.center-figure,
+.numbers-container,
+.cell-names-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Порядок слоев (z-index) */
+.snakes-container { z-index: 2; }
+.arrows-container { z-index: 3; }
+.glowing-elements-container { z-index: 4; }
+.center-figure { z-index: 5; }
+.numbers-container { z-index: 6; }
+.cell-names-container { z-index: 7; }
+
+/* Добавляем стили для контуров змей */
+.snake-outline {
+    display: none;
+}
+
+/* Убираем старые стили змей */
+.snake {
+    display: none;
+}
+
+/* Анимация для змей */
+@keyframes snakeMove {
+    0%, 100% {
+        stroke-width: 2;
+        filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.3));
+    }
+    50% {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 4px rgba(0, 255, 0, 0.5));
+    }
+}
+
+/* Индивидуальные стили для каждой змеи */
+#snake1 {
+    animation-delay: 0s;
+}
+
+#snake2 {
+    animation-delay: 0.5s;
+}
+
+#snake3 {
+    animation-delay: 1s;
+}
+
+#snake4 {
+    animation-delay: 1.5s;
+}
+
+/* Добавляем стили для отладочных элементов */
+.debug-point {
+    display: none;
+}
+
+.debug-text {
+    display: none;
+}
+
+/* Добавляем анимацию свечения */
+@keyframes verticalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px rgba(0, 183, 255, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 15px rgba(0, 183, 255, 0.7);
+    }
+}
+
+/* Добавляем задержку для каждой линии, чтобы они светились по очереди */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 1s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 1.2s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 1.4s; }
+
+.grid-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Обновляем стиль для линий сетки - пресет "Ом" */
+.grid-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.grid-line.vertical {
+    width: 2px;
+    height: 100%;
+    top: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 183, 255, 0.1) 0%,
+        rgba(0, 183, 255, 0.4) 50%,
+        rgba(0, 183, 255, 0.1) 100%
+    );
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+    animation: verticalLineGlow 2s ease-in-out infinite;
+}
+
+.grid-line.horizontal {
+    width: 100%;
+    height: 1px;
+    left: 0;
+}
+
+@keyframes verticalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px rgba(0, 183, 255, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 15px rgba(0, 183, 255, 0.7);
+    }
+}
+
+/* Добавляем задержку для каждой линии */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 1s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 1.2s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 1.4s; }
+
+/* Обновляем класс для кристального эффекта */
+.grid-line.crystal-active {
+    animation: crystalGlow var(--crystal-duration, 3s) infinite ease-in-out;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(127, 255, 212, 0.4) 25%,
+        rgba(64, 224, 208, 0.6) 50%,
+        rgba(0, 255, 255, 0.4) 75%,
+        rgba(255, 255, 255, 0.8) 100%
+    );
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.4),
+        0 0 40px rgba(127, 255, 212, 0.3),
+        0 0 60px rgba(64, 224, 208, 0.2);
+    opacity: 1;
+    backdrop-filter: blur(2px);
+}
+
+@keyframes crystalGlow {
+    0% {
+        filter: hue-rotate(0deg) brightness(1);
+        transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+        opacity: 0;
+    }
+    25% {
+        filter: hue-rotate(90deg) brightness(1.5);
+        transform: perspective(500px) rotateX(15deg) rotateY(-15deg);
+        opacity: 1;
+    }
+    50% {
+        filter: hue-rotate(180deg) brightness(2);
+        transform: perspective(500px) rotateX(-15deg) rotateY(15deg);
+        opacity: 0.8;
+    }
+    75% {
+        filter: hue-rotate(270deg) brightness(1.5);
+        transform: perspective(500px) rotateX(15deg) rotateY(-15deg);
+        opacity: 1;
+    }
+    100% {
+        filter: hue-rotate(360deg) brightness(1);
+        transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+        opacity: 0;
+    }
+}
+
+/* Задержки для создания эффекта распространения электричества */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.1s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.3s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 0.5s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 0.7s; }
+.grid-line.vertical:nth-child(9) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(10) { animation-delay: 0.9s; }
+
+.grid-line.horizontal:nth-child(11) { animation-delay: 0.05s; }
+.grid-line.horizontal:nth-child(12) { animation-delay: 0.15s; }
+.grid-line.horizontal:nth-child(13) { animation-delay: 0.25s; }
+.grid-line.horizontal:nth-child(14) { animation-delay: 0.35s; }
+.grid-line.horizontal:nth-child(15) { animation-delay: 0.45s; }
+.grid-line.horizontal:nth-child(16) { animation-delay: 0.55s; }
+.grid-line.horizontal:nth-child(17) { animation-delay: 0.65s; }
+.grid-line.horizontal:nth-child(18) { animation-delay: 0.75s; }
+.grid-line.horizontal:nth-child(19) { animation-delay: 0.85s; }
+
+/* Контейнер сетки */
+.grid-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Добавляем стили для контейнера номеров */
+.cell-numbers-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3; /* Поверх сетки */
+}
+
+/* Стили для номеров клеток */
+.cell-number {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 5px rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    backdrop-filter: blur(1px);
+}
+
+/* Добавляем анимацию появления */
+.cell-number {
+    animation: numberAppear 0.5s ease-out;
+}
+
+@keyframes numberAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Добавляем стили для контейнера контуров */
+.number-outlines-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4; /* Поверх номеров */
+}
+
+/* Обновляем стили для контуров номеров */
+.number-outline {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 15px #fff,
+        0 0 20px #0ff,
+        0 0 35px #0ff,
+        0 0 40px #0ff;
+    transform: translate(-50%, -50%);
+    animation: numberGlow 3s infinite ease-in-out;
+}
+
+/* Обновляем анимацию для номеров */
+@keyframes numberGlow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1);
+        text-shadow: 
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #0ff,
+            0 0 20px #0ff,
+            0 0 35px #0ff;
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+        text-shadow: 
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 30px #0ff,
+            0 0 40px #0ff,
+            0 0 50px #0ff,
+            0 0 60px #0ff;
+    }
+}
+
+/* Добавляем эффект ореола вокруг номеров */
+.number-outline::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(0, 255, 255, 0.2) 0%,
+        rgba(0, 255, 255, 0.1) 50%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: haloEffect 3s infinite ease-in-out;
+}
+
+@keyframes haloEffect {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+}
+
+/* Добавляем стили для canvas с контурами */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    mix-blend-mode: overlay; /* Это поможет контурам лучше смешиваться с фоном */
+}
+
+/* Контейнер для контуров номеров */
+.numbers-outline-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Стиль для контуров номеров */
+.number-outline {
+    position: absolute;
+    font-family: Arial, sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: transparent;
+    -webkit-text-stroke: 1px white;
+    text-stroke: 1px white;
+    transform: translate(-50%, -50%);
+    text-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff;
+    animation: outlineGlow 2s infinite ease-in-out;
+}
+
+@keyframes outlineGlow {
+    0%, 100% {
+        text-shadow: 
+            0 0 2px #fff,
+            0 0 4px #fff;
+        opacity: 0.7;
+    }
+    50% {
+        text-shadow: 
+            0 0 2px #fff,
+            0 0 4px #fff,
+            0 0 6px #fff,
+            0 0 8px #fff;
+        opacity: 1;
+    }
+}
+
+/* Обновляем стили для золотой клетки (фишки) */
+.golden-cell {
+    position: absolute;
+    width: 70px; /* Увеличиваем размер фишки */
+    height: 70px;
+    background: radial-gradient(circle, rgba(255,223,0,1) 0%, rgba(255,200,0,0.9) 50%, rgba(255,180,0,0.7) 80%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.8),
+        0 0 30px rgba(255, 215, 0, 0.5),
+        0 0 45px rgba(255, 215, 0, 0.3);
+    transform: translate(-50%, -50%); /* Центрируем относительно позиции */
+    z-index: 100;
+    transition: all 0.8s ease-in-out;
+    /* Добавляем центрирование для текста */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif; /* Красивый шрифт */
+    font-weight: bold;
+    font-size: 28px; /* Увеличиваем размер текста */
+    color: #622a0f; /* Глубокий коричневый для контраста */
+    text-shadow: 
+        0 0 2px white,
+        0 0 4px rgba(255, 255, 255, 0.8); /* Белое свечение вокруг текста */
+    animation: goldenPulse 2s infinite alternate; /* Добавляем пульсацию */
+}
+
+/* Анимация пульсации для фишки */
+@keyframes goldenPulse {
+    from {
+        box-shadow: 
+            0 0 15px rgba(255, 215, 0, 0.8),
+            0 0 30px rgba(255, 215, 0, 0.5),
+            0 0 45px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.9),
+            0 0 40px rgba(255, 215, 0, 0.7),
+            0 0 60px rgba(255, 215, 0, 0.5);
+    }
+}
+
+/* Эффекты для змей и стрел (обновленные) */
+.snake-effect {
+    animation: snakeFall 1.5s ease-in-out;
+}
+
+.ladder-effect {
+    animation: ladderRise 1.5s ease-in-out;
+}
+
+@keyframes snakeFall {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(0.8) rotate(180deg);
+        filter: brightness(0.7) hue-rotate(300deg);
+        box-shadow: 
+            0 0 30px rgba(139, 0, 0, 0.8),
+            0 0 50px rgba(139, 0, 0, 0.6);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+}
+
+@keyframes ladderRise {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        filter: brightness(1.5);
+        box-shadow: 
+            0 0 30px rgba(255, 223, 0, 0.9),
+            0 0 60px rgba(255, 223, 0, 0.7),
+            0 0 90px rgba(255, 223, 0, 0.5);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* Эффект Ом также нужно обновить для соответствия */
+.om-effect {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,223,0,0.5) 40%, transparent 80%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: omPulse 1.5s ease-out forwards;
+    z-index: 90;
+    pointer-events: none;
+}
+
+@keyframes omPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Стили для портала змеи */
+.snake-portal {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,0,0,0.8) 0%, rgba(80,0,0,0.6) 50%, rgba(40,0,0,0) 100%);
+    box-shadow: 
+        inset 0 0 20px rgba(139,0,0,0.9),
+        0 0 30px rgba(139,0,0,0.7);
+    transform: translate(-50%, -50%) scale(0);
+    animation: snakePortalOpen 1.5s ease-in-out forwards;
+    z-index: 95;
+}
+
+@keyframes snakePortalOpen {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Стили для волны света */
+.light-wave {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,223,0,0.3) 30%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: lightWaveExpand 1s ease-out forwards;
+    z-index: 95;
+}
+
+@keyframes lightWaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Стили для темной энергии */
+.dark-energy {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(80,0,0,0.7) 0%, rgba(40,0,0,0.3) 30%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: darkEnergyExpand 1s ease-in forwards;
+    z-index: 95;
+}
+
+@keyframes darkEnergyExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Удаляем следующие стили */
+.cell-numbers-container,
+.cell-number,
+.number-outline,
+.numbers-outline-container {
+    display: none;
+}
+
+/* Удаляем все стили, связанные с player */
+.player {
+    display: none;
+}
+
+/* Базовые стили для линий сетки */
+.grid-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Пресет "Электрический" */
+.grid-line.electric {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 255, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.5),
+        0 0 20px rgba(0, 255, 255, 0.3);
+    animation: electricPulse 1.5s infinite;
+}
+
+@keyframes electricPulse {
+    0%, 100% {
+        opacity: 0.3;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.5);
+    }
+}
+
+/* Пресет "Кристальный" */
+.grid-line.crystal {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.8),
+        rgba(200, 220, 255, 0.9),
+        rgba(255, 255, 255, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.4),
+        0 0 30px rgba(200, 220, 255, 0.3);
+    animation: crystalGlow 3s infinite;
+}
+
+@keyframes crystalGlow {
+    0%, 100% {
+        opacity: 0.5;
+        filter: hue-rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        filter: hue-rotate(45deg);
+    }
+}
+
+/* Пресет "Золотой" */
+.grid-line.golden {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.8),
+        rgba(255, 223, 0, 0.9),
+        rgba(255, 215, 0, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 223, 0, 0.3);
+    animation: goldenPulse 2s infinite;
+}
+
+@keyframes goldenPulse {
+    0%, 100% {
+        opacity: 0.5;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 0.8;
+        filter: brightness(1.3);
+    }
+}
+
+/* Пресет "Белый" */
+.grid-line.white {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    box-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.2),
+        0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Обновляем позицию контейнера кубика - подняв на ~1см вверх и вправо */
+.dice-container {
+    position: absolute;
+    bottom: 3px;   /* Было: -35px (подняли вверх на ~38px = 1см) */
+    right: -73px;  /* Было: -35px (сдвинули вправо, уменьшив на ~38px = 1см) */
+    z-index: 100;
+}
+
+.text-dice {
+    width: 70px;
+    height: 70px;
+    background-color: #282c3b;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.text-dice:hover {
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+}
+
+.text-dice:active {
+    transform: scale(0.95) translateY(2px);
+    box-shadow: 0 0 5px rgba(138, 43, 226, 0.3);
+}
+
+.dice-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+    font-family: 'Cinzel', serif;
+}
+
+/* Анимация броска кубика */
+@keyframes dice-roll {
+    0% {
+        transform: rotate(0deg) translateY(0);
+    }
+    20% {
+        transform: rotate(-8deg) translateY(3px);
+    }
+    40% {
+        transform: rotate(8deg) translateY(3px);
+    }
+    60% {
+        transform: rotate(-5deg) translateY(2px);
+    }
+    80% {
+        transform: rotate(5deg) translateY(1px);
+    }
+    100% {
+        transform: rotate(0deg) translateY(0);
+    }
+}
+
+.rolling {
+    animation: dice-roll 0.5s ease;
+    pointer-events: none;
+}
+
+/* Свечение при броске */
+@keyframes dice-glow {
+    0% {
+        box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 0 0 40px rgba(138, 43, 226, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+    }
+}
+
+.dice-glow {
+    animation: dice-glow 0.5s ease;
+}
+
+/* Стили для эффекта победы */
+.victory-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: gold;
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: victory-explosion 2s ease-out forwards;
+}
+
+@keyframes victory-explosion {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(20) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+/* Стили для аудио-элемента (скрываем его) */
+#background-music {
+    display: none;
+}
+
+/* Стили для фишки в состоянии рождения */
+.birth-cell {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(148,0,211,0.7) 50%, rgba(72,61,139,0.6) 100%);
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    box-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(148, 0, 211, 0.5);
+    animation: birthGlow 3s infinite alternate;
+}
+
+/* Анимация свечения для фишки рождения */
+@keyframes birthGlow {
+    0% {
+        box-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(148, 0, 211, 0.5);
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        box-shadow: 
+            0 0 15px rgba(255, 255, 255, 0.9),
+            0 0 30px rgba(148, 0, 211, 0.7),
+            0 0 45px rgba(72, 61, 139, 0.4);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* Аура вокруг фишки рождения */
+.birth-aura {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(148, 0, 211, 0.3);
+    transform: translate(-50%, -50%);
+    z-index: 49;
+    animation: birthAura 4s infinite;
+}
+
+/* Анимация расширения ауры */
+@keyframes birthAura {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+        border-color: rgba(148, 0, 211, 0.5);
+    }
+    50% {
+        opacity: 0.4;
+        border-color: rgba(147, 112, 219, 0.3);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0;
+        border-color: rgba(230, 230, 250, 0.1);
+    }
+}
+
+/* Частицы энергии вокруг фишки рождения */
+.birth-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgba(176, 196, 222, 0.7);
+    transform: translate(-50%, -50%);
+    z-index: 48;
+    pointer-events: none;
+    animation: birthParticle 4s infinite;
+}
+
+/* Анимация движения частиц */
+@keyframes birthParticle {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(10px);
+        opacity: 0.2;
+    }
+    25% {
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg) translateX(25px);
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(10px);
+        opacity: 0.2;
+    }
+}
+
+/* Эффект трансформации при выпадении 6 */
+.birth-transformation {
+    animation: birthTransform 2s forwards;
+}
+
+@keyframes birthTransform {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        filter: brightness(3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        filter: brightness(5);
+        opacity: 0;
+    }
+}
+
+/* Вспышка света при рождении */
+.birth-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    animation: birthFlash 2s forwards;
+}
+
+@keyframes birthFlash {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Эффект пульсации при неудачном броске */
+.birth-pulse {
+    animation: birthPulse 1s;
+}
+
+@keyframes birthPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    25% {
+        transform: translate(-50%, -50%) scale(1.2);
+        filter: hue-rotate(30deg) brightness(1.2);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(0.9);
+        filter: hue-rotate(60deg) brightness(0.9);
+    }
+    75% {
+        transform: translate(-50%, -50%) scale(1.1);
+        filter: hue-rotate(30deg) brightness(1.1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+}
+
+/* Стиль для сияния победы */
+.victory-glow {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,255,255,0.9) 30%, rgba(255,215,0,0.5) 70%, rgba(255,255,255,0) 100%);
+    transform: translate(-50%, -50%);
+    z-index: 47;
+    animation: victoryPulse 2s infinite alternate;
+    pointer-events: none;
+    filter: blur(3px);
+}
+
+@keyframes victoryPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Стили для эффекта чакры */
+.chakra-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+    animation: chakraPulse 2s ease-in-out forwards, chakraGlow 10s infinite alternate;
+}
+
+@keyframes chakraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+    70% {
+        opacity: 0.85;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+@keyframes chakraGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.3);
+    }
+}
+
+@keyframes chakraFadeOut {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+}
+
+/* Обновленные цвета для разных чакр с учетом реальных цветов клеток */
+.chakra-glow.chakra-5 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,0,0,0.3) 30%, rgba(139,0,0,0.2) 60%, rgba(139,0,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,0,0,0.5),
+        0 0 60px 30px rgba(255,0,0,0.3),
+        0 0 90px 45px rgba(255,0,0,0.2),
+        0 0 120px 60px rgba(255,0,0,0.1);
+    filter: hue-rotate(0deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-14 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,140,0,0.3) 30%, rgba(205,92,0,0.2) 60%, rgba(205,92,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,140,0,0.5),
+        0 0 60px 30px rgba(255,140,0,0.3),
+        0 0 90px 45px rgba(255,140,0,0.2),
+        0 0 120px 60px rgba(255,140,0,0.1);
+    filter: hue-rotate(25deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-23 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,0,0.3) 30%, rgba(204,204,0,0.2) 60%, rgba(204,204,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,255,0,0.5),
+        0 0 60px 30px rgba(255,255,0,0.3),
+        0 0 90px 45px rgba(255,255,0,0.2),
+        0 0 120px 60px rgba(255,255,0,0.1);
+    filter: hue-rotate(45deg) saturate(150%) brightness(130%);
+}
+
+.chakra-glow.chakra-32 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(46,204,113,0.3) 30%, rgba(39,174,96,0.2) 60%, rgba(39,174,96,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(46,204,113,0.5),
+        0 0 60px 30px rgba(46,204,113,0.3),
+        0 0 90px 45px rgba(46,204,113,0.2),
+        0 0 120px 60px rgba(46,204,113,0.1);
+    filter: hue-rotate(100deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-41 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(52,152,219,0.3) 30%, rgba(41,128,185,0.2) 60%, rgba(41,128,185,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(52,152,219,0.5),
+        0 0 60px 30px rgba(52,152,219,0.3),
+        0 0 90px 45px rgba(52,152,219,0.2),
+        0 0 120px 60px rgba(52,152,219,0.1);
+    filter: hue-rotate(180deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-50 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(93,63,211,0.3) 30%, rgba(75,0,130,0.2) 60%, rgba(75,0,130,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(93,63,211,0.5),
+        0 0 60px 30px rgba(93,63,211,0.3),
+        0 0 90px 45px rgba(93,63,211,0.2),
+        0 0 120px 60px rgba(93,63,211,0.1);
+    filter: hue-rotate(240deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-59 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(173,68,233,0.3) 30%, rgba(138,43,226,0.2) 60%, rgba(138,43,226,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(173,68,233,0.5),
+        0 0 60px 30px rgba(173,68,233,0.3),
+        0 0 90px 45px rgba(173,68,233,0.2),
+        0 0 120px 60px rgba(173,68,233,0.1);
+    filter: hue-rotate(275deg) saturate(150%) brightness(120%);
+}
+
+/* Золотой эффект Ом (оставляем для сравнения) */
+.chakra-glow.chakra-gold {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,223,0,0.3) 30%, rgba(218,165,32,0.2) 60%, rgba(218,165,32,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,223,0,0.5),
+        0 0 60px 30px rgba(255,223,0,0.3),
+        0 0 90px 45px rgba(255,223,0,0.2),
+        0 0 120px 60px rgba(255,223,0,0.1);
+    filter: sepia(50%) saturate(400%) hue-rotate(10deg) brightness(130%);
+}
+
+/* Улучшенная пульсация для эффекта чакр */
+.chakra-pulse {
+    animation: chakraInnerPulse 5s infinite alternate;
+}
+
+@keyframes chakraInnerPulse {
+    0% {
+        box-shadow: 
+            0 0 30px 15px rgba(255,255,255,0.2),
+            0 0 60px 30px rgba(255,255,255,0.1),
+            0 0 90px 45px rgba(255,255,255,0.05);
+        filter: blur(0px);
+    }
+    50% {
+        box-shadow: 
+            0 0 40px 20px rgba(255,255,255,0.3),
+            0 0 80px 40px rgba(255,255,255,0.15),
+            0 0 120px 60px rgba(255,255,255,0.1);
+        filter: blur(2px);
+    }
+    100% {
+        box-shadow: 
+            0 0 50px 25px rgba(255,255,255,0.4),
+            0 0 100px 50px rgba(255,255,255,0.2),
+            0 0 150px 75px rgba(255,255,255,0.1);
+        filter: blur(0px);
+    }
+}
+
+/* Улучшенные частицы энергии */
+.chakra-particle {
+    position: absolute;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+    opacity: 0;
+}
+
+.chakra-particle-inner {
+    animation: chakraParticleInner 4s ease-out;
+}
+
+.chakra-particle-outer {
+    animation: chakraParticleOuter 6s ease-out;
+}
+
+@keyframes chakraParticleInner {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(10) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes chakraParticleOuter {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(20) rotate(-180deg);
+        opacity: 0;
+    }
+}
+
+/* Улучшенная центральная вспышка */
+.central-chakra-glow {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 12;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: centralChakraGlow 3s ease-out;
+    filter: blur(2px);
+}
+
+@keyframes centralChakraGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.1);
+        opacity: 0;
+    }
+}
+
+/* Стили для подсказки Click на кубике */
+.click-invite {
+    animation: invite-pulse 2s infinite;
+}
+
+@keyframes invite-pulse {
+    0% {
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(138, 43, 226, 0.8), 0 0 40px rgba(138, 43, 226, 0.4);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        transform: scale(1);
+    }
+}
+
+.text-dice .click-text {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 8px rgba(138, 43, 226, 0.9);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+    animation: text-glow 2s infinite;
+}
+
+@keyframes text-glow {
+    0% {
+        text-shadow: 0 0 8px rgba(138, 43, 226, 0.9);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 0 25px rgba(138, 43, 226, 0.8);
+    }
+    100% {
+        text-shadow: 0 0 8px rgba(138, 43, 226, 0.9);
+    }
+}
+
+/* Стили для БОК (Блок описания клеток) */
+.cell-description-box {
+    position: fixed !important;
+    right: -18px !important; /* Было -8px, сдвигаем еще на 10px вправо */
+    top: calc(50% + 248px) !important;
+    transform: translateY(-50%) !important;
+    z-index: 1000 !important;
+    width: 320px !important;
+    min-height: 160px !important;
+    height: auto !important;
+    max-height: 350px !important; /* Добавляем максимальную высоту */
+    overflow-y: auto !important; /* Добавляем прокрутку при необходимости */
+    background: rgba(20, 22, 36, 0.8) !important; /* Немного усиливаем непрозрачность для лучшей читаемости */
+    border-radius: 16px !important;
+    padding: 20px 22px !important;
+    box-shadow: 
+        0 0 25px rgba(0, 0, 0, 0.5),
+        inset 0 0 15px rgba(100, 100, 255, 0.15),
+        0 0 8px rgba(120, 160, 255, 0.4) !important;
+    color: #e0e0ff !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(130, 130, 220, 0.3) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transition: all 0.5s ease-in-out !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(100, 181, 246, 0.5) rgba(20, 22, 36, 0.3) !important;
+}
+
+/* Стилизуем скроллбар для блока описания */
+.cell-description-box::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.cell-description-box::-webkit-scrollbar-track {
+    background: rgba(20, 22, 36, 0.3) !important;
+    border-radius: 10px !important;
+}
+
+.cell-description-box::-webkit-scrollbar-thumb {
+    background: rgba(100, 181, 246, 0.5) !important;
+    border-radius: 10px !important;
+}
+
+.cell-description-box::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 181, 246, 0.7) !important;
+}
+
+.box-content {
+    width: 100% !important;
+    height: auto !important;
+    animation: fadeIn 1s ease-in-out !important;
+}
+
+.box-title {
+    font-family: 'Cinzel', serif !important;
+    /* Уменьшаем базовый размер шрифта */
+    font-size: 1.5em !important; 
+    /* Адаптивный размер шрифта - зависит от длины текста */
+    font-size: clamp(1.2em, 3vw, 1.8em) !important;
+    font-weight: 700 !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 8px !important;
+    width: 100% !important;
+    background: linear-gradient(90deg, #64B5F6, #E1F5FE, #64B5F6) !important;
+    background-size: 200% auto !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    text-fill-color: transparent !important;
+    animation: gradient 8s ease infinite !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    text-shadow: 
+        0 0 10px rgba(100, 181, 246, 0.8),
+        0 0 30px rgba(100, 181, 246, 0.3) !important;
+    display: inline-block !important;
+    border-bottom: 1px solid rgba(100, 181, 246, 0.3) !important;
+    line-height: 1.3 !important;
+    /* Добавляем перенос строк для длинных названий */
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+}
+
+/* Дополнительный скрипт для динамической адаптации размера текста */
+@media (max-width: 1200px) {
+    .box-title {
+        font-size: 1.4em !important;
+    }
+}
+
+/* Для особенно длинных текстов */
+.box-title.long-title {
+    font-size: 1.25em !important;
+    letter-spacing: 0px !important;
+}
+
+.box-text {
+    font-family: 'Arial', sans-serif !important;
+    font-size: 1.15em !important;
+    line-height: 1.6 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7) !important;
+    margin-bottom: 0 !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Добавляем новую анимацию градиента для заголовка */
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Анимация для плавного появления содержимого */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Мягкая пульсация для БОК при появлении */
+.cell-description-box:hover {
+    box-shadow: 
+        0 0 30px rgba(0, 0, 0, 0.6),
+        inset 0 0 20px rgba(100, 100, 255, 0.2),
+        0 0 12px rgba(140, 180, 255, 0.5) !important;
+}
+
+/* Увеличиваем контрастность текста при наведении для лучшей читаемости */
+.cell-description-box:hover .box-text {
+    color: rgba(255, 255, 255, 1) !important;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Усиливаем эффект заголовка при наведении */
+.cell-description-box:hover .box-title {
+    text-shadow: 
+        0 0 15px rgba(100, 181, 246, 0.9),
+        0 0 40px rgba(100, 181, 246, 0.4) !important;
+}
+
+/* Золотой эффект для клетки 68 (План Абсолюта) */
+.absolute-effect {
+    filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    animation: pulseGold 4s infinite !important;
+    transition: filter 1s ease-in-out;
+}
+
+@keyframes pulseGold {
+    0% {
+        filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    }
+    50% {
+        filter: sepia(100%) saturate(600%) hue-rotate(10deg) brightness(180%);
+    }
+    100% {
+        filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    }
+}
+
+.absolute-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,223,0,0.4) 30%, rgba(255,255,224,0.2) 60%, rgba(255,255,255,0) 80%);
+    z-index: 90;
+    pointer-events: none;
+    animation: overlayPulse 4s infinite alternate;
+    opacity: 1;
+    transition: opacity 2s ease;
+}
+
+@keyframes overlayPulse {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.absolute-message {
+    color: #FFD700 !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 10px rgba(255,215,0,0.8) !important;
+    animation: messageGlow 2s infinite alternate !important;
+}
+
+@keyframes messageGlow {
+    0% {
+        color: gold;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+    50% {
+        color: #fff8dc;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+    100% {
+        color: gold;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+}
+
+/* Дополнительные лучи света (опционально) */
+.light-ray {
+    position: absolute;
+    background: linear-gradient(to bottom, rgba(255,215,0,0.8), transparent);
+    width: 2px;
+    height: 0;
+    transform-origin: top center;
+    animation: rayGrow 6s linear infinite;
+    pointer-events: none;
+    z-index: 91;
+}
+
+@keyframes rayGrow {
+    0% {
+        height: 0;
+        opacity: 0;
+    }
+    20% {
+        height: 100%;
+        opacity: 0.8;
+    }
+    80% {
+        height: 100%;
+        opacity: 0.8;
+    }
+    100% {
+        height: 0;
+        opacity: 0;
+    }
+}
+
+/* Золотой эффект для БОК клетки 68 (План Абсолюта) */
+.absolute-box-effect {
+    background-color: rgba(50, 40, 10, 0.9) !important;
+    border: 1px solid rgba(255, 215, 0, 0.7) !important;
+    box-shadow: 
+        inset 0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 15px rgba(255, 215, 0, 0.5) !important;
+    animation: box-pulse 4s infinite alternate !important;
+}
+
+@keyframes box-pulse {
+    0% {
+        box-shadow: 
+            inset 0 0 20px rgba(255, 215, 0, 0.4),
+            0 0 15px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        box-shadow: 
+            inset 0 0 30px rgba(255, 215, 0, 0.7),
+            0 0 25px rgba(255, 215, 0, 0.8);
+    }
+}
+
+.absolute-box-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,223,0,0.1) 50%, rgba(255,255,224,0.05) 70%, rgba(255,255,255,0) 100%);
+    z-index: -1;
+    pointer-events: none;
+    animation: box-overlay-pulse 4s infinite alternate;
+    opacity: 1;
+    transition: opacity 2s ease;
+}
+
+@keyframes box-overlay-pulse {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.absolute-box-title {
+    color: #FFD700 !important;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8) !important;
+    animation: absolute-title-pulse 3s infinite !important;
+}
+
+@keyframes absolute-title-pulse {
+    0%, 100% {
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 0 0 25px rgba(255, 215, 0, 0.7);
+    }
+}
+
+.absolute-box-text {
+    color: #FFF8DC !important; /* Cornsilk цвет для лучшей читаемости */
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5) !important;
+}
+
+/* Добавляем стили для "золотых" звездочек в БОК */
+.absolute-star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background-color: rgba(255, 215, 0, 0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: star-twinkle 3s infinite alternate;
+    z-index: 5;
+}
+
+@keyframes star-twinkle {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Золотистый текст для click на кубике */
+.golden-click {
+    font-size: 22px;
+    font-weight: bold;
+    color: gold;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+    animation: golden-text-glow 2s infinite;
+}
+
+@keyframes golden-text-glow {
+    0% {
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 215, 0, 0.8);
+    }
+    100% {
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Обновление стилей для бокового блока для применения эффекта золотого свечения */
+.cell-description-box.golden {
+    filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    animation: pulseGold 4s infinite;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+}
+
+/* Стили для кнопки перезапуска */
+.restart-button {
+    position: absolute;
+    bottom: 3px;   /* Такая же позиция снизу, как у кубика */
+    left: -73px;   /* Симметрично кубику, который находится справа */
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #663300, #996633, #CC9966, #FFCC99, #FFCC66, #CC9966, #996633, #663300);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 20px gold;
+    animation: restart-button-pulse 2s infinite;
+    transition: all 0.5s ease;
+    font-family: 'Cinzel', serif;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+    z-index: 100;
+    width: 70px;  /* Примерно такой же ширины как кубик */
+    height: 70px; /* Такой же высоты как кубик */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.restart-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px gold, 0 0 50px rgba(255, 215, 0, 0.5);
+}
+
+.restart-button:active {
+    transform: scale(0.98);
+}
+
+@keyframes restart-button-pulse {
+    0% {
+        box-shadow: 0 0 15px gold;
+    }
+    50% {
+        box-shadow: 0 0 30px gold, 0 0 50px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 15px gold;
+    }
+}
+
+/* Обновляем стили для золотистого кубика */
+.golden-dice {
+    pointer-events: none; /* Отключаем клики на время появления кнопки */
+    cursor: default;
+    background: linear-gradient(135deg, #663300, #996633, #CC9966, #FFCC99, #FFCC66, #CC9966, #996633, #663300);
+    box-shadow: 0 0 20px gold;
+    animation: golden-dice-pulse 2s infinite;
+}
+
+@keyframes golden-dice-pulse {
+    0% {
+        box-shadow: 0 0 15px gold;
+    }
+    50% {
+        box-shadow: 0 0 25px gold, 0 0 40px rgba(255, 215, 0, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 15px gold;
+    }
+}
+
+/* Звезды на фоне (улучшенная версия) */
+.star {
+    position: fixed;
+    background-color: white;
+    border-radius: 50%;
+    z-index: -2;
+    animation: twinkle var(--twinkle-duration, 3s) infinite ease-in-out;
+}
+
+@keyframes twinkle {
+    0%, 100% {
+        opacity: var(--min-opacity, 0.2);
+        box-shadow: 0 0 var(--glow-size, 1px) rgba(255, 255, 255, var(--glow-opacity, 0.1));
+    }
+    50% {
+        opacity: var(--max-opacity, 0.8);
+        box-shadow: 0 0 var(--glow-size-max, 2px) rgba(255, 255, 255, var(--glow-opacity-max, 0.3));
+    }
+}
+
+/* Улучшенные стили для планет */
+.space-planet {
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+    animation: move-across var(--move-duration, 120s) linear forwards;
+    background-size: 100% 100%;
+    box-shadow: 
+        inset 0 0 20px rgba(255, 255, 255, 0.3), 
+        0 0 var(--glow-radius, 30px) var(--glow-color, rgba(120, 160, 255, 0.6));
+    filter: contrast(1.2) saturate(1.2);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+/* Улучшенные кольца планет */
+.planet-rings {
+    position: absolute;
+    width: 230%;
+    height: 30%;
+    left: -65%;
+    top: 35%;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 6px solid rgba(255, 255, 255, 0.15);
+    transform: rotateX(75deg);
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.3),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+    z-index: -1;
+    backdrop-filter: blur(1px);
+}
+
+/* Внутренние кольца (для эффекта многослойности) */
+.planet-rings-inner {
+    position: absolute;
+    width: 180%;
+    height: 20%;
+    left: -40%;
+    top: 40%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 175, 0.25);
+    transform: rotateX(75deg);
+    box-shadow: 0 0 8px rgba(255, 215, 175, 0.2);
+    z-index: -1;
+}
+
+/* Эффект поверхности планет */
+.planet-texture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-size: 200% 200%;
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+    animation: rotate-texture 80s linear infinite;
+}
+
+@keyframes rotate-texture {
+    from { background-position: 0% 0%; }
+    to { background-position: 200% 200%; }
+}
+
+/* Атмосфера планеты */
+.planet-atmosphere {
+    position: absolute;
+    top: -15%;
+    left: -15%;
+    width: 130%;
+    height: 130%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 30% 30%,
+        transparent 30%,
+        var(--atmosphere-color, rgba(100, 200, 255, 0.1)) 70%,
+        transparent 100%
+    );
+    filter: blur(5px);
+    mix-blend-mode: screen;
+    z-index: -1;
+}
+
+/* Стиль для туманностей (замена черных дыр) */
+.space-nebula {
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+    animation: move-across var(--move-duration, 180s) linear forwards;
+    background-size: 100% 100%;
+    filter: blur(var(--blur-amount, 20px)) contrast(1.5) brightness(1.2);
+    opacity: 0.7;
+    mix-blend-mode: screen;
+}
+
+/* Внутренняя структура туманности с мерцанием */
+.nebula-inner {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background-size: 150% 150%;
+    filter: blur(5px);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+}
+
+@keyframes nebula-pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.9) rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.1) rotate(10deg);
+    }
+}
+
+@keyframes nebula-twinkle {
+    0% {
+        filter: brightness(0.8) contrast(0.9);
+    }
+    50% {
+        filter: brightness(1.2) contrast(1.1);
+    }
+    100% {
+        filter: brightness(0.9) contrast(1);
+    }
+}
+
+/* Слой с яркими пятнами в туманности */
+.nebula-spots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-size: 100% 100%;
+    mix-blend-mode: screen;
+    opacity: 0.7;
+}
+
+@keyframes nebula-spots-twinkle {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+    33% {
+        opacity: 0.8;
+    }
+    66% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+/* Анимация для замедленного движения планет */
+@keyframes move-across {
+    from {
+        transform: translateX(-150px) rotate(var(--rotation, 0deg));
+    }
+    to {
+        transform: translateX(calc(100vw + 150px)) rotate(calc(var(--rotation, 0deg) + var(--rotation-end, 0deg)));
+    }
+}
+
+/* Стили для фишки и номера клетки */
+.player-token {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    /* Remove background and visual elements */
+    background: transparent;
+    box-shadow: none;
+    z-index: 100;
+    transition: left 0.8s ease-out, top 0.8s ease-out;
+    pointer-events: none;
+}
+
+/* Анимация прыжка фишки */
+.jump-animation {
+    animation: jump 0.5s ease-out;
+}
+
+@keyframes jump {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -100%) scale(1.3); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Стиль для номера текущей клетки */
+.token-number {
+    position: absolute;
+    font-size: 28px; /* Increased size */
+    font-weight: bold;
+    color: gold;
+    text-shadow: 
+        0 0 5px gold,
+        0 0 10px orange,
+        0 0 20px rgba(255, 200, 0, 0.7);
+    z-index: 110;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: left 0.8s ease-out, top 0.8s ease-out;
+    font-family: 'Cinzel', serif; /* More elegant font */
+    /* No animation - static display */
+}
+
+/* Пульсация номера */
+@keyframes number-pulse {
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(0.9);
+        text-shadow: 
+            0 0 5px gold,
+            0 0 10px orange;
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+        text-shadow: 
+            0 0 10px gold,
+            0 0 20px orange,
+            0 0 30px rgba(255, 200, 0, 0.7);
+    }
+}
+
+/* Подсветка текущей клетки */
+.cell-highlight {
+    position: absolute;
+    width: 11.1%;
+    height: 12.5%;
+    border-radius: 20%;
+    z-index: 90;
+    pointer-events: none;
+}
+
+.highlight-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20%;
+    border: 2px solid rgba(255, 215, 0, 0.7);
+    box-shadow: 
+        inset 0 0 10px rgba(255, 215, 0, 0.3),
+        0 0 15px rgba(255, 215, 0, 0.5);
+    animation: highlight-pulse 2s infinite alternate ease-in-out;
+}
+
+.highlight-glow {
+    position: absolute;
+    width: 130%;
+    height: 130%;
+    top: -15%;
+    left: -15%;
+    border-radius: 20%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 215, 0, 0.3) 0%,
+        rgba(255, 215, 0, 0.1) 50%,
+        transparent 70%
+    );
+    filter: blur(5px);
+    animation: highlight-glow 3s infinite alternate ease-in-out;
+}
+
+@keyframes highlight-pulse {
+    0% {
+        transform: scale(0.95);
+        border-color: rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        transform: scale(1.05);
+        border-color: rgba(255, 215, 0, 0.9);
+    }
+}
+
+@keyframes highlight-glow {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+/* Add these styles near other animation definitions */
+
+/* Snake fall animation */
+@keyframes snakeMove {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Arrow rise animation */
+@keyframes arrowMove {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(calc((var(--end-x) - var(--start-x))*0.5 + var(--start-x)), 
+                            calc((var(--end-y) - var(--start-y))*0.3 + var(--start-y))) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Styles for snake effect */
+.snake-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,0,0,0.8) 0%, rgba(80,0,0,0.6) 50%, rgba(40,0,0,0) 100%);
+    box-shadow: 0 0 20px rgba(139,0,0,0.7);
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    pointer-events: none;
+}
+
+/* Styles for arrow effect */
+.arrow-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,223,0,0.9) 0%, rgba(255,215,0,0.7) 50%, rgba(255,200,0,0) 100%);
+    box-shadow: 0 0 30px rgba(255,215,0,0.8);
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    pointer-events: none;
+}
+
+/* Light wave effect for arrows */
+.light-wave {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 200, 0.8) 0%,
+        rgba(255, 215, 0, 0.6) 30%,
+        rgba(255, 165, 0, 0.3) 60%,
+        transparent 100%
+    );
+    transform: translate(-50%, -50%);
+    z-index: 85;
+    animation: light-wave 1s forwards ease-out;
+    pointer-events: none;
+}
+
+@keyframes light-wave {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Snake portal effect */
+.snake-portal {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(100, 0, 0, 0.1) 0%,
+        rgba(139, 0, 0, 0.6) 40%,
+        rgba(80, 0, 0, 0.8) 70%,
+        rgba(50, 0, 0, 0.5) 100%
+    );
+    box-shadow: 0 0 30px rgba(139, 0, 0, 0.8);
+    z-index: 85;
+    animation: snake-portal-pulse 2s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes snake-portal-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.9;
+    }
+}
+
+/* Victory effect styles */
+.victory-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: gold;
+    box-shadow: 0 0 10px gold;
+    transform: translate(-50%, -50%);
+    z-index: 110;
+    animation: victory-particle 2s forwards;
+    pointer-events: none;
+}
+
+@keyframes victory-particle {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) translate(
+            calc(var(--particle-x, 0) * 100px),
+            calc(var(--particle-y, 0) * 100px)
+        ) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Golden cell effect (cell 68) */
+.golden-cell {
+    position: absolute;
+    border-radius: 20%;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    z-index: 50;
+    pointer-events: none;
+}
+
+.absolute-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 215, 0, 0.2) 0%,
+        rgba(255, 215, 0, 0.1) 40%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    z-index: 80;
+    pointer-events: none;
+    animation: overlay-fade 3s forwards;
+}
+
+@keyframes overlay-fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.absolute-effect {
+    animation: absolute-cell-pulse 2s infinite alternate ease-in-out;
+    z-index: 90;
+}
+
+@keyframes absolute-cell-pulse {
+    0% {
+        box-shadow: 0 0 30px gold;
+        filter: brightness(1.2);
+    }
+    100% {
+        box-shadow: 0 0 50px gold, 0 0 80px rgba(255, 215, 0, 0.5);
+        filter: brightness(1.5);
+    }
+}
+
+.absolute-message {
+    color: gold !important;
+    font-size: 24px !important;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    animation: message-pulse 2s infinite alternate;
+}
+
+@keyframes message-pulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+    100% {
+        transform: scale(1.05);
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+    }
+}
+
+.golden-dice {
+    background: radial-gradient(circle at 30% 30%, #ffdf80 0%, #ffd700 40%, #b8860b 100%) !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8) !important;
+    animation: golden-dice-pulse 2s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-dice-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Improved styling for the dice display */
+#game-dice {
+    /* Keep existing properties */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Style for the number display inside the dice */
+#game-dice span {
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 28px;
+    color: #FFD700; /* Gold color */
+    text-shadow: 
+        0 0 5px #FFD700,
+        0 0 10px #FFA500;
+    letter-spacing: 1px;
+}
+
+/* Style for the "click" text */
+.click-text {
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 22px;
+    color: #FFD700;
+    text-shadow: 
+        0 0 5px #FFD700,
+        0 0 10px #FFA500;
+    letter-spacing: 1px;
+}
+
+/* Enhanced glow effect for the dice when active */
+#game-dice:hover span, 
+#game-dice:hover .click-text {
+    text-shadow: 
+        0 0 8px #FFD700,
+        0 0 15px #FFA500,
+        0 0 20px rgba(255, 215, 0, 0.7);
+    transition: text-shadow 0.3s ease;
+}
+
+/* Trail cell styles - subtler effects, 50-100% opacity range */
+.trail-cell {
+    position: absolute;
+    width: 11.1%;
+    height: 12.5%;
+    border-radius: 20%;
+    z-index: 85; 
+    pointer-events: none;
+}
+
+.trail-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        inset 0 0 6px rgba(200, 200, 255, 0.15),
+        0 0 8px rgba(200, 200, 255, 0.15);
+    animation: trail-pulse 6s infinite alternate ease-in-out; /* Slower animation */
+}
+
+.trail-glow {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    top: -5%;
+    left: -5%;
+    border-radius: 20%;
+    background: radial-gradient(
+        circle at center,
+        rgba(200, 200, 255, 0.1) 0%,
+        rgba(200, 200, 255, 0.05) 50%,
+        transparent 70%
+    );
+    filter: blur(2px);
+    animation: trail-glow 8s infinite alternate ease-in-out; /* Slower animation */
+}
+
+@keyframes trail-pulse {
+    0% {
+        transform: scale(0.98);
+        opacity: 0.5; /* Min 50% opacity */
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7; /* Max 70% opacity */
+    }
+}
+
+@keyframes trail-glow {
+    0% {
+        opacity: 0.5; /* Min 50% opacity */
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 0.7; /* Max 70% opacity */
+        transform: scale(1.01);
+    }
+}
+
+/* Video Container Styles */
+.video-container {
+    width: 23.1%; /* Reduced by 30% from 33% */
+    height: 17.5%; /* Reduced by 30% from 25% */
+    background: rgba(20, 22, 30, 0.8);
+    border-radius: 10px;
+    box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px rgba(80, 60, 120, 0.3);
+    position: relative;
+    overflow: hidden;
+    margin-top: 124px; /* Reduced by another 10px to move up 1cm more */
+}
+
+/* Border glow effect for video containers */
+.video-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid rgba(80, 60, 120, 0.5);
+    border-radius: 10px;
+    box-shadow: 
+        inset 0 0 15px rgba(80, 60, 120, 0.3),
+        0 0 15px rgba(120, 100, 180, 0.2);
+    pointer-events: none;
+}
+
+/* Inner video frame with subtle gradient */
+.video-container::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, 
+        rgba(40, 42, 54, 0.8) 0%,
+        rgba(30, 32, 44, 0.9) 100%);
+    pointer-events: none;
+}
+
+/* Camera placeholder icon for empty video containers */
+.video-container:before {
+    content: '\1F4F7'; /* Camera emoji as placeholder */
+    font-size: 40px;
+    color: rgba(255, 255, 255, 0.2);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+/* Video element styling (when added later) */
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 3;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Specific styling for host video (left side) */
+.host-video {
+    margin-right: 20px;
+}
+
+/* Specific styling for player video (right side) */
+.player-video {
+    margin-left: 20px;
+}
+
+/* Update game container to accommodate the video containers */
+.game-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start; /* Align items at the top */
+}
+
+/* Adjust main content width to accommodate video containers */
+.main-content {
+    width: 34%; /* Reduced from 60% to make room for video containers */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Video controls */
+.video-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+}
+
+.control-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(40, 42, 54, 0.7);
+    border: 1px solid rgba(80, 60, 120, 0.5);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    background: rgba(60, 62, 74, 0.9);
+    box-shadow: 0 0 10px rgba(120, 100, 180, 0.5);
+}
+
+/* For muted microphone or disabled camera */
+.control-button.disabled {
+    color: #ff4444;
+    background: rgba(40, 20, 20, 0.7);
+}
+
+/* Connection status indicator */
+.connection-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #ccc;
+    font-size: 12px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.connected {
+    color: #4CAF50;
+}
+
+.connecting {
+    color: #FFC107;
+}
+
+.disconnected {
+    color: #F44336;
+}
+
+/* Стили для золотых частиц */
+.golden-particle {
+    position: absolute;
+    background-color: gold;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 92;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+}
+
+/* Добавьте эти стили в ваш CSS файл */
+
+/* Стили для частиц кармы */
+.karma-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 92;
+    transition: all 0.3s ease;
+}
+
+/* Стили для положительной кармы */
+.karma-overlay.good {
+    mix-blend-mode: screen;
+}
+
+/* Стили для отрицательной кармы */
+.karma-overlay.bad {
+    mix-blend-mode: multiply;
+}
+
+/* Улучшенный стиль для неоновых линий следа */
+.grid-line-highlight {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    animation: neonPulse 2s infinite alternate;
+}
+
+/* Стили для горизонтальных линий */
+.grid-line-highlight[style*="height: 1px"] {
+    height: 2px !important; /* Делаем линию чуть толще */
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0)
+    );
+    box-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff,
+        0 0 8px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Стили для вертикальных линий */
+.grid-line-highlight[style*="width: 1px"] {
+    width: 2px !important; /* Делаем линию чуть толще */
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0)
+    );
+    box-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff,
+        0 0 8px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Неоновая пульсация */
+@keyframes neonPulse {
+    0%, 100% {
+        opacity: 0.7;
+        filter: brightness(0.8) saturate(1.5);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.2) saturate(2);
+    }
+}
+
+/* Золотой цвет для повторных посещений */
+.grid-line-highlight.visited-twice[style*="height: 1px"] {
+    background: linear-gradient(
+        to right,
+        rgba(255, 215, 0, 0),
+        rgba(255, 215, 0, 0.9),
+        rgba(255, 215, 0, 0)
+    );
+    box-shadow: 
+        0 0 2px #FFD700,
+        0 0 4px #FFD700,
+        0 0 6px #FFD700,
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 14px rgba(255, 215, 0, 0.6);
+}
+
+.grid-line-highlight.visited-twice[style*="width: 1px"] {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 215, 0, 0),
+        rgba(255, 215, 0, 0.9),
+        rgba(255, 215, 0, 0)
+    );
+    box-shadow: 
+        0 0 2px #FFD700,
+        0 0 4px #FFD700,
+        0 0 6px #FFD700,
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 14px rgba(255, 215, 0, 0.6);
+}
+
+/* Голубой цвет для клеток, посещенных трижды и более */
+.grid-line-highlight.visited-thrice[style*="height: 1px"] {
+    background: linear-gradient(
+        to right,
+        rgba(30, 144, 255, 0),
+        rgba(30, 144, 255, 0.9),
+        rgba(30, 144, 255, 0)
+    );
+    box-shadow: 
+        0 0 2px #1E90FF,
+        0 0 4px #1E90FF,
+        0 0 6px #1E90FF,
+        0 0 10px rgba(30, 144, 255, 0.8),
+        0 0 14px rgba(30, 144, 255, 0.6);
+}
+
+.grid-line-highlight.visited-thrice[style*="width: 1px"] {
+    background: linear-gradient(
+        to bottom,
+        rgba(30, 144, 255, 0),
+        rgba(30, 144, 255, 0.9),
+        rgba(30, 144, 255, 0)
+    );
+    box-shadow: 
+        0 0 2px #1E90FF,
+        0 0 4px #1E90FF,
+        0 0 6px #1E90FF,
+        0 0 10px rgba(30, 144, 255, 0.8),
+        0 0 14px rgba(30, 144, 255, 0.6);
+}
+
+/* Уменьшаем видимость оригинальных следов, но не полностью их скрываем */
+.cell-trail, .subtle-trail-marker {
+    opacity: 0.1 !important;
+    transition: opacity 0.5s ease;
+}
+
+/* New Snake Trail Animation Styles */
+@keyframes snakeTrailFlow {
+    0% {
+        opacity: 0.2;
+        filter: brightness(0.5) saturate(0.8);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.3) saturate(1.5);
+    }
+    100% {
+        opacity: 0.2;
+        filter: brightness(0.5) saturate(0.8);
+    }
+}
+
+/* Base style enhancement for grid line highlights */
+.grid-line-highlight {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    animation: neonPulse 2s infinite alternate, snakeTrailFlow 4s infinite ease-in-out;
+    transition: all 0.5s ease;
+}
+
+/* Animation for snake trail effect - separate delay calculation for each cell */
+.grid-line-highlight[data-trail-order="1"] { animation-delay: 0s, 0s; }
+.grid-line-highlight[data-trail-order="2"] { animation-delay: 0.1s, 0.2s; }
+.grid-line-highlight[data-trail-order="3"] { animation-delay: 0.2s, 0.4s; }
+.grid-line-highlight[data-trail-order="4"] { animation-delay: 0.3s, 0.6s; }
+.grid-line-highlight[data-trail-order="5"] { animation-delay: 0.4s, 0.8s; }
+.grid-line-highlight[data-trail-order="6"] { animation-delay: 0.5s, 1.0s; }
+.grid-line-highlight[data-trail-order="7"] { animation-delay: 0.6s, 1.2s; }
+.grid-line-highlight[data-trail-order="8"] { animation-delay: 0.7s, 1.4s; }
+.grid-line-highlight[data-trail-order="9"] { animation-delay: 0.8s, 1.6s; }
+.grid-line-highlight[data-trail-order="10"] { animation-delay: 0.9s, 1.8s; }
+/* Add more if needed for longer trails */
+
+/* Enhancement for horizontal lines */
+.grid-line-highlight[style*="height: 1px"] {
+    height: 3px !important; /* Make lines slightly thicker */
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0)
+    );
+    box-shadow: 
+        0 0 3px #fff,
+        0 0 5px #fff,
+        0 0 8px #fff,
+        0 0 12px rgba(255, 255, 255, 0.8),
+        0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* Enhancement for vertical lines */
+.grid-line-highlight[style*="width: 1px"] {
+    width: 3px !important; /* Make lines slightly thicker */
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0)
+    );
+    box-shadow: 
+        0 0 3px #fff,
+        0 0 5px #fff,
+        0 0 8px #fff,
+        0 0 12px rgba(255, 255, 255, 0.8),
+        0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* Enhanced styles for the current cell - where the player is now */
+.grid-line-highlight.current-cell {
+    animation: currentCellPulse 1.5s infinite alternate !important;
+}
+
+@keyframes currentCellPulse {
+    0% {
+        opacity: 0.9;
+        filter: brightness(1.2) saturate(1.5);
+        box-shadow: 
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #fff,
+            0 0 20px rgba(255, 255, 255, 0.9),
+            0 0 25px rgba(255, 255, 255, 0.7);
+    }
+    100% {
+        opacity: 1;
+        filter: brightness(1.5) saturate(2);
+        box-shadow: 
+            0 0 8px #fff,
+            0 0 15px #fff,
+            0 0 20px #fff,
+            0 0 30px rgba(255, 255, 255, 0.9),
+            0 0 40px rgba(255, 255, 255, 0.7);
+    }
+}
+
+/* Enhanced "visited twice" styles */
+.grid-line-highlight.visited-twice[style*="height: 1px"] {
+    background: linear-gradient(
+        to right,
+        rgba(255, 215, 0, 0),
+        rgba(255, 215, 0, 0.9),
+        rgba(255, 215, 0, 0)
+    );
+    box-shadow: 
+        0 0 5px #FFD700,
+        0 0 10px #FFD700,
+        0 0 15px #FFD700,
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+.grid-line-highlight.visited-twice[style*="width: 1px"] {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 215, 0, 0),
+        rgba(255, 215, 0, 0.9),
+        rgba(255, 215, 0, 0)
+    );
+    box-shadow: 
+        0 0 5px #FFD700,
+        0 0 10px #FFD700,
+        0 0 15px #FFD700,
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+/* Enhanced "visited thrice" styles */
+.grid-line-highlight.visited-thrice[style*="height: 1px"] {
+    background: linear-gradient(
+        to right,
+        rgba(30, 144, 255, 0),
+        rgba(30, 144, 255, 0.9),
+        rgba(30, 144, 255, 0)
+    );
+    box-shadow: 
+        0 0 5px #1E90FF,
+        0 0 10px #1E90FF,
+        0 0 15px #1E90FF,
+        0 0 20px rgba(30, 144, 255, 0.8),
+        0 0 25px rgba(30, 144, 255, 0.6);
+}
+
+.grid-line-highlight.visited-thrice[style*="width: 1px"] {
+    background: linear-gradient(
+        to bottom,
+        rgba(30, 144, 255, 0),
+        rgba(30, 144, 255, 0.9),
+        rgba(30, 144, 255, 0)
+    );
+    box-shadow: 
+        0 0 5px #1E90FF,
+        0 0 10px #1E90FF,
+        0 0 15px #1E90FF,
+        0 0 20px rgba(30, 144, 255, 0.8),
+        0 0 25px rgba(30, 144, 255, 0.6);
+}
+
+/* Простой стиль для маркера следа */
+.simple-trail-dot {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 15px rgb(144, 238, 144) !important,
+        0 0 30px rgb(144, 238, 144) !important,
+        0 0 45px rgb(144, 238, 144) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+}
+
+/* Обновляем стиль для точки следа */
+.trail-dot {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+/* Стили для точки клетки 68 */
+.cell68-dot {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 15px !important;
+    height: 15px !important;
+    border-radius: 50% !important;
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+}
+
+/* Удаляем старые стили для линий подсветки */
+.grid-line-highlight {
+    display: none !important; /* Скрываем все старые линии подсветки */
+}
+
+/* Эффект золотого свечения для клетки 68 */
+.game-board.golden-glow {
+    filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    animation: pulseGolden 2s infinite;
+}
+
+@keyframes pulseGolden {
+    0% { filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%); }
+    50% { filter: sepia(100%) saturate(600%) hue-rotate(10deg) brightness(200%); }
+    100% { filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%); }
+}
+
+/* Божественные лучи для клетки 68 */
+.divine-ray {
+    position: absolute;
+    background: linear-gradient(to var(--direction), transparent, rgba(255, 215, 0, 0.3), rgba(255, 255, 255, 0.8), rgba(255, 215, 0, 0.3), transparent);
+    transform-origin: var(--origin);
+    animation: rayPulse 3s infinite alternate;
+    pointer-events: none;
+    z-index: 998;
+}
+
+@keyframes rayPulse {
+    0% { opacity: 0.5; width: var(--min-width); height: var(--min-height); }
+    100% { opacity: 0.8; width: var(--max-width); height: var(--max-height); }
+}
+
+/* Fixing CSS syntax errors */
+
+/* Cell 54 styles (original was missing semicolons) */
+.grid-cell[data-cell-number="54"] {
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 15px rgb(144, 238, 144) !important,
+        0 0 30px rgb(144, 238, 144) !important,
+        0 0 45px rgb(144, 238, 144) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+}
+
+/* Trail dot styles (original was missing semicolons) */
+.trail-dot {
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+/* Cell 68 dot styles (original was missing semicolons) */
+.cell68-dot {
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+}
+
+/* Styles for water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.6);
+    pointer-events: none;
+    z-index: 9999;
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* OM Preset styles */
+.om-preset {
+    opacity: 1 !important;
+    filter: brightness(1.2) !important;
+    transition: all 0.5s ease-in-out !important;
+}
+
+.om-preset-active .grid-cell {
+    opacity: 1 !important;
+    filter: brightness(1.2) !important;
+}
+
+.om-preset-active .game-grid {
+    opacity: 1 !important;
+    filter: brightness(1.2) !important;
+}
+
+/* Water ripple cell styles */
+.water-ripple-cell {
+    opacity: 1 !important;
+    filter: brightness(1.3) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
+    z-index: 10;
+    transition: all 0.4s ease-out !important;
+}
+
+.cell68-glow {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8) !important;
+    opacity: 1 !important;
+    filter: brightness(1.5) !important;
+    z-index: 100 !important;
+    animation: cell68-pulse 3s infinite alternate !important;
+}
+
+@keyframes cell68-pulse {
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.7) !important; }
+    50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9) !important; }
+    100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.7) !important; }
+}
+
+/* Эффект золотого свечения для клетки 68 */
+.game-board.golden-glow {
+    filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+    animation: pulseGolden 2s infinite;
+}
+
+/* Золотое свечение для центра клетки 68 */
+.cell68-center-glow {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.6) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.5);
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    pointer-events: none;
+    animation: centerGlowPulse 3s infinite alternate;
+}
+
+@keyframes centerGlowPulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+}
+
+/* Стили для золотых частиц */
+.golden-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 215, 0, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    pointer-events: none;
+    animation: particle-fade 2s forwards;
+}
+
+@keyframes particle-fade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateX(var(--tx)) translateY(var(--ty)) scale(0.2);
+    }
+}
+
+/* Styles for water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.6);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* Стили для описания в пресете ОМ */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important;
+    animation: descriptionPulse 2s infinite alternate !important;
+}
+
+.absolute-title {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    margin-bottom: 10px !important;
+    text-align: center !important;
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+}
+
+.absolute-description {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+}
+
+@keyframes descriptionPulse {
+    0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 15px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Стили для дебаг-панели */
+.debug-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    /* Скрываем панель по умолчанию */
+    display: none;
+}
+
+/* Показываем панель только в режиме разработчика */
+.dev-mode .debug-panel {
+    display: block;
+}
+
+.debug-btn {
+    padding: 8px 15px;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 4px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.debug-btn:hover {
+    background: linear-gradient(45deg, #FFA500, #FFD700);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.debug-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Усиленные стили для пресета ОМ с высочайшим приоритетом */
+.om-preset-active .game-board,
+.om-preset-active-important .game-board {
+    filter: sepia(50%) saturate(300%) hue-rotate(10deg) brightness(130%) !important;
+    animation: pulseGolden 4s infinite alternate !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+.golden-glow-priority {
+    filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%) !important;
+    animation: pulseGolden 3s infinite alternate !important;
+    opacity: 1 !important;
+}
+
+@keyframes pulseGolden {
+    0% { filter: sepia(50%) saturate(300%) hue-rotate(10deg) brightness(130%); }
+    50% { filter: sepia(70%) saturate(400%) hue-rotate(15deg) brightness(150%); }
+    100% { filter: sepia(50%) saturate(300%) hue-rotate(10deg) brightness(130%); }
+}
+
+/* Стиль для центрального свечения клетки 68 */
+@keyframes cell68-glow {
+    0% { 
+        box-shadow: 0 0 30px 5px rgba(255,215,0,0.8), 0 0 60px 10px rgba(255,215,0,0.5);
+        opacity: 0.8;
+    }
+    100% { 
+        box-shadow: 0 0 50px 15px rgba(255,215,0,1), 0 0 100px 30px rgba(255,215,0,0.7);
+        opacity: 1;
+    }
+}
+
+/* Специальные стили для блока описания */
+.cell68-description {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5) !important;
+    background: linear-gradient(rgba(0, 0, 30, 0.85), rgba(0, 0, 50, 0.85)) !important;
+    color: #4DA6FF !important;
+    border: 1px solid rgba(255, 215, 0, 0.3) !important;
+    animation: descriptionBoxGlow 3s infinite alternate !important;
+}
+
+@keyframes descriptionBoxGlow {
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4) !important; }
+    100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.7) !important; }
+}
+
+@keyframes descriptionPulse {
+    0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 15px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Стили, которые перезаписывают все возможные стили прозрачности */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    filter: brightness(150%) !important;
+}
+
+/* Fix cell68 dot styling issues */
+.cell68-dot {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+}
+
+/* Fix trail dot styling issues */
+.trail-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgb(144, 238, 144) !important;
+    box-shadow: 
+        0 0 20px rgb(144, 238, 144) !important,
+        0 0 35px rgb(144, 238, 144) !important,
+        0 0 50px rgb(144, 238, 144) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+/* Fix cell68 golden overlay effect */
+.om-preset-active .cell68-overlay,
+.om-preset-active-important .cell68-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.3), transparent 70%) !important;
+    animation: overlayPulseGold 3s infinite alternate !important;
+    z-index: 50 !important;
+    pointer-events: none !important;
+}
+
+@keyframes overlayPulseGold {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+/* Styles for golden particles */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    animation: particleMove 4s ease-out forwards;
+}
+
+@keyframes particleMove {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+            calc(-50% + ${Math.random() * 400 - 200}px),
+            calc(-50% + ${Math.random() * 400 - 200}px)
+        ) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Styles for water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.6);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* Golden effect keyframes and transitions */
+@keyframes centralGlowPulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
+}
+
+@keyframes goldenPulse {
+    0% { filter: sepia(50%) saturate(300%) hue-rotate(10deg) brightness(130%); }
+    100% { filter: sepia(70%) saturate(400%) hue-rotate(15deg) brightness(160%); }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(30%) saturate(150%) hue-rotate(5deg) brightness(110%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(50%) saturate(300%) hue-rotate(10deg) brightness(130%) !important;
+    transition: filter 3s ease-in-out !important;
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(120%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(150%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(120%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(150%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7), 0 0 20px 10px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+    z-index: 9999;
+    animation: particle-move 4s ease-out forwards;
+}
+
+@keyframes particle-move {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--move-x, 100px), var(--move-y, 100px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Water ripple effect */
+.water-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.7);
+    background: transparent;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: water-wave 2s ease-out forwards;
+}
+
+@keyframes water-wave {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+}
+
+/* Central glow */
+.central-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.5) 30%, rgba(255,215,0,0) 70%);
+    box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    animation: central-glow-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes central-glow-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+        box-shadow: 0 0 50px 30px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+        box-shadow: 0 0 80px 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+/* Global golden overlay */
+.golden-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 50%, rgba(255,215,0,0) 100%);
+    pointer-events: none;
+    z-index: 9997;
+    animation: overlay-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes overlay-pulse {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+/* Enhanced text styles */
+.om-description {
+    color: #FFD700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9) !important;
+    animation: description-pulse 2s infinite alternate !important;
+}
+
+@keyframes description-pulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important; }
+    100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1) !important; }
+}
+
+/* Initial OM preset state - subtle effect */
+.om-preset-active .game-board {
+    filter: sepia(40%) saturate(200%) hue-rotate(5deg) brightness(120%) !important;
+    transition: filter 2s ease-in-out !important;
+}
+
+/* Full OM preset state - strong golden glow */
+.om-preset-active-important .game-board {
+    filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+    transition: filter 3s ease-in-out !important;
+    animation: golden-board-pulse 4s infinite alternate ease-in-out !important;
+}
+
+@keyframes golden-board-pulse {
+    0% {
+        filter: sepia(80%) saturate(400%) hue-rotate(15deg) brightness(150%) !important;
+        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5) !important;
+    }
+    100% {
+        filter: sepia(90%) saturate(500%) hue-rotate(20deg) brightness(170%) !important;
+        box-shadow: 0 0 80px 40px rgba(255, 215, 0, 0.7) !important;
+    }
+}
+
+/* Pulsing effect for entire page when full effect is active */
+.pulse-enabled {
+    animation: global-pulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes global-pulse {
+    0% { filter: brightness(100%) contrast(100%); }
+    100% { filter: brightness(120%) contrast(110%); }
+}
+
+/* Fix transparency in both OM preset states */
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent,
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    opacity: 1 !important;
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out !important;
+}
+
+.om-preset-active .mr-transparent,
+.om-preset-active .transparent-board,
+.om-preset-active .transparent,
+.om-preset-active .translucent {
+    filter: brightness(130%) !important;
+}
+
+.om-preset-active-important .mr-transparent,
+.om-preset-active-important .transparent-board,
+.om-preset-active-important .transparent,
+.om-preset-active-important .translucent {
+    filter: brightness(170%) !important;
+}
+
+/* Enhanced OM Preset Effect Styles */
+
+/* Golden particle animation */
+.golden-particle {
+    position: absolute;
+    border-radius: 50%;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7) !important;
+    animation: descriptionPulse 2s infinite alternate !important;
+}

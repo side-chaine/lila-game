@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Отключаем кэширование страницы -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Игра Лиля</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            max-width: 1600px;
+            margin: 0 auto;
+            transform: translateX(-4%);
+        }
+
+        /* Добавляем стили для горизонтальных линий */
+        .horizontal-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background-color: yellow;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Добавляем стиль для радужного эффекта */
+        .rainbow-cell {
+            animation: rainbowPulse 3s infinite;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes rainbowPulse {
+            0% { background-color: #ff0000; transform: scale(1); }
+            20% { background-color: #ff9900; transform: scale(1.1); }
+            40% { background-color: #ffff00; transform: scale(1); }
+            60% { background-color: #33cc33; transform: scale(1.1); }
+            80% { background-color: #3399ff; transform: scale(1); }
+            100% { background-color: #ff0000; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-content">
+            <div class="board-container">
+                <img src="images/maket2.jpg" class="game-board" alt="Game Board">
+                <div class="grid-container"></div>
+                
+                <!-- Заменяем 3D кубик на текстовый с текстом в нижнем регистре -->
+                <div class="dice-container">
+                    <div id="game-dice" class="text-dice click-invite">
+                        <span class="click-text">click</span>
+                    </div>
+                </div>
+                
+                <!-- Добавляем БОК справа от игрового поля с приветственным текстом -->
+                <div class="cell-description-box">
+                    <div class="box-content">
+                        <h3 class="box-title">Добро пожаловать!</h3>
+                        <div class="box-text">
+                            Приветствую вас на пути духовного познания! Бросьте кубик, чтобы начать игру. 
+                            Для старта необходимо выбросить 6 - тогда ваше путешествие начнется.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="message">Бросьте кубик, чтобы начать игру</div>
+        </div>
+    </div>
+
+    <!-- Закомментируем аудио-элементы, так как файлы отсутствуют -->
+    <!--
+    <audio id="snake1" src="sounds/snake1.mp3" preload="auto"></audio>
+    <audio id="snake2" src="sounds/snake2.mp3" preload="auto"></audio>
+    <audio id="up1" src="sounds/Up1.mp3" preload="auto"></audio>
+    <audio id="up2" src="sounds/Up2.mp3" preload="auto"></audio>
+    -->
+
+    <script src="script.js"></script>
+</body>
+</html>

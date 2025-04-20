@@ -1,0 +1,151 @@
+body {
+    background-color: white; /* Белый фон */
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex; /* Используем flexbox для компоновки */
+}
+
+.video-block {
+    width: 25%; /* Фиксированная ширина для блоков видео */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.game-board {
+    width: 50%; /* Ширина игрового поля */
+    position: relative;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 9 столбцов */
+    grid-template-rows: repeat(8, 1fr); /* 8 строк */
+    gap: 1px; /* Промежутки между клетками */
+    background-color: black; /* Цвет границ клеток */
+}
+
+.cell {
+    width: 100%;
+    height: 100%;
+    background-image: url('images/maket.png'); /* Фоновое изображение сетки */
+    background-size: cover; /* Растягиваем изображение под размер клетки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Цвет текста */
+    font-size: 12px; /* Размер шрифта для номеров клеток */
+}
+
+.player {
+    position: absolute;
+    width: 20px; /* Диаметр фишки */
+    height: 20px;
+    background-color: red; /* Цвет фишки */
+    border-radius: 50%; /* Круглая форма фишки */
+    transition: transform 0.5s; /* Плавное движение фишки */
+}
+
+.message {
+    margin-top: 10px; /* Отступ для сообщения */
+    font-size: 16px; /* Размер шрифта для сообщения */
+}
+
+button {
+    margin-top: 10px; /* Отступ для кнопки */
+    padding: 10px 20px; /* Отступы внутри кнопки */
+    font-size: 16px; /* Размер шрифта для кнопки */
+}
+
+:root {
+    /* Основные цвета для линий */
+    --line-color: rgb(144, 238, 144);
+    --line-glow: rgb(144, 238, 144);
+    --line-opacity: 0.9;
+    
+    /* Параметры анимации */
+    --animation-duration: 2s;
+    --animation-intensity: 1.3;
+}
+
+/* Базовые стили для линий сетки */
+.grid-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+/* Вертикальные линии */
+.grid-line.vertical {
+    width: 2px;
+    height: 100%;
+    top: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(var(--line-color-rgb), 0.1) 0%,
+        rgba(var(--line-color-rgb), var(--line-opacity)) 50%,
+        rgba(var(--line-color-rgb), 0.1) 100%
+    );
+    box-shadow: 0 0 10px var(--line-glow);
+    animation: verticalLineGlow var(--animation-duration) ease-in-out infinite;
+}
+
+/* Горизонтальные линии */
+.grid-line.horizontal {
+    width: 100%;
+    height: 2px;
+    left: 0;
+    background: linear-gradient(
+        to right,
+        rgba(var(--line-color-rgb), 0.1) 0%,
+        rgba(var(--line-color-rgb), var(--line-opacity)) 50%,
+        rgba(var(--line-color-rgb), 0.1) 100%
+    );
+    box-shadow: 0 0 10px var(--line-glow);
+    animation: horizontalLineGlow var(--animation-duration) ease-in-out infinite;
+}
+
+/* Анимации для линий */
+@keyframes verticalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px var(--line-glow);
+    }
+    50% {
+        opacity: var(--line-opacity);
+        box-shadow: 0 0 15px var(--line-glow);
+    }
+}
+
+@keyframes horizontalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px var(--line-glow);
+    }
+    50% {
+        opacity: var(--line-opacity);
+        box-shadow: 0 0 15px var(--line-glow);
+    }
+}
+
+/* Стили для активной клетки */
+.grid-line.active {
+    --line-opacity: 1;
+    animation-duration: calc(var(--animation-duration) * 0.7);
+    box-shadow: 0 0 20px var(--line-glow), 0 0 30px var(--line-glow);
+}
+
+/* Стили для посещенной клетки */
+.grid-line.visited {
+    --line-opacity: 0.7;
+    animation-duration: calc(var(--animation-duration) * 1.2);
+}
+
+/* Стили для пути */
+.grid-line.path {
+    --line-opacity: 0.8;
+    animation-duration: calc(var(--animation-duration) * 0.9);
+}

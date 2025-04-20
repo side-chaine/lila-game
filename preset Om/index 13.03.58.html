@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра Лиля</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .game-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            max-width: 1600px;
+            margin: 0 auto;
+            transform: translateX(-4%);
+        }
+        
+        .grid-container {
+            position: absolute;
+            top: 0;
+            left: 0.2%;
+            width: 99.8%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            pointer-events: none;
+        }
+
+        .game-board {
+            filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%);
+            animation: pulseYellow 2s infinite;
+        }
+
+        @keyframes pulseYellow {
+            0% { filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%); }
+            50% { filter: sepia(100%) saturate(600%) hue-rotate(10deg) brightness(200%); }
+            100% { filter: sepia(100%) saturate(400%) hue-rotate(10deg) brightness(150%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="sidebar left">
+            <div class="video-container">
+                <!-- Видео контейнер -->
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="board-container">
+                <img src="images/maket2.jpg" class="game-board" alt="Game Board">
+                <div class="grid-container"></div>
+                <div class="snakes-container"></div>
+                <div class="arrows-container"></div>
+                <div class="glowing-elements-container"></div>
+                <div class="center-figure"></div>
+                <div class="numbers-container"></div>
+                <div class="cell-names-container"></div>
+                <div class="player"></div>
+            </div>
+            <div class="message">Бросьте кубик, чтобы начать игру</div>
+            <div class="controls">
+                <div id="dice" class="dice">
+                    <div class="dice-dots"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar right">
+            <!-- Правый сайдбар -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

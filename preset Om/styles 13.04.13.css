@@ -1,0 +1,2205 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    background: #1e2128;
+}
+
+.game-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 20%;
+    background: rgba(20, 22, 26, 0.95);
+}
+
+.main-content {
+    width: 60%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.game-board {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.message {
+    margin-top: 20px;
+    color: white;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* Базовые стили для кнопок и других элементов управления */
+button {
+    margin-top: 15px;
+    padding: 10px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#result {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Стили для стрелок и змей можно добавить позже */ 
+
+/* Новый контейнер для макета */
+.maket-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 20px auto;
+    border: 2px solid green; /* Отладочная рамка */
+}
+
+/* Стиль для изображения макета */
+#maket {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 2px solid black;
+    background-color: #f8f8f8; /* Фоновый цвет, чтобы было видно, где должно быть изображение */
+}
+
+/* Обновляем стили для контейнера игрового поля */
+.board-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.game-board {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Контейнеры для элементов */
+.snakes-container,
+.arrows-container,
+.glowing-elements-container,
+.center-figure,
+.numbers-container,
+.cell-names-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Порядок слоев (z-index) */
+.snakes-container { z-index: 2; }
+.arrows-container { z-index: 3; }
+.glowing-elements-container { z-index: 4; }
+.center-figure { z-index: 5; }
+.numbers-container { z-index: 6; }
+.cell-names-container { z-index: 7; }
+
+/* Добавляем стили для контуров змей */
+.snake-outline {
+    display: none;
+}
+
+/* Убираем старые стили змей */
+.snake {
+    display: none;
+}
+
+/* Анимация для змей */
+@keyframes snakeMove {
+    0%, 100% {
+        stroke-width: 2;
+        filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.3));
+    }
+    50% {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 4px rgba(0, 255, 0, 0.5));
+    }
+}
+
+/* Индивидуальные стили для каждой змеи */
+#snake1 {
+    animation-delay: 0s;
+}
+
+#snake2 {
+    animation-delay: 0.5s;
+}
+
+#snake3 {
+    animation-delay: 1s;
+}
+
+#snake4 {
+    animation-delay: 1.5s;
+}
+
+/* Добавляем стили для отладочных элементов */
+.debug-point {
+    display: none;
+}
+
+.debug-text {
+    display: none;
+}
+
+/* Добавляем анимацию свечения */
+@keyframes verticalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px rgba(0, 183, 255, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 15px rgba(0, 183, 255, 0.7);
+    }
+}
+
+/* Добавляем задержку для каждой линии, чтобы они светились по очереди */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 1s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 1.2s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 1.4s; }
+
+.grid-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Обновляем стиль для линий сетки - пресет "Ом" */
+.grid-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.grid-line.vertical {
+    width: 2px;
+    height: 100%;
+    top: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 183, 255, 0.1) 0%,
+        rgba(0, 183, 255, 0.4) 50%,
+        rgba(0, 183, 255, 0.1) 100%
+    );
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+    animation: verticalLineGlow 2s ease-in-out infinite;
+}
+
+.grid-line.horizontal {
+    width: 100%;
+    height: 1px;
+    left: 0;
+}
+
+@keyframes verticalLineGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 5px rgba(0, 183, 255, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 15px rgba(0, 183, 255, 0.7);
+    }
+}
+
+/* Добавляем задержку для каждой линии */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 1s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 1.2s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 1.4s; }
+
+/* Обновляем класс для кристального эффекта */
+.grid-line.crystal-active {
+    animation: crystalGlow var(--crystal-duration, 3s) infinite ease-in-out;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(127, 255, 212, 0.4) 25%,
+        rgba(64, 224, 208, 0.6) 50%,
+        rgba(0, 255, 255, 0.4) 75%,
+        rgba(255, 255, 255, 0.8) 100%
+    );
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.4),
+        0 0 40px rgba(127, 255, 212, 0.3),
+        0 0 60px rgba(64, 224, 208, 0.2);
+    opacity: 1;
+    backdrop-filter: blur(2px);
+}
+
+@keyframes crystalGlow {
+    0% {
+        filter: hue-rotate(0deg) brightness(1);
+        transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+        opacity: 0;
+    }
+    25% {
+        filter: hue-rotate(90deg) brightness(1.5);
+        transform: perspective(500px) rotateX(15deg) rotateY(-15deg);
+        opacity: 1;
+    }
+    50% {
+        filter: hue-rotate(180deg) brightness(2);
+        transform: perspective(500px) rotateX(-15deg) rotateY(15deg);
+        opacity: 0.8;
+    }
+    75% {
+        filter: hue-rotate(270deg) brightness(1.5);
+        transform: perspective(500px) rotateX(15deg) rotateY(-15deg);
+        opacity: 1;
+    }
+    100% {
+        filter: hue-rotate(360deg) brightness(1);
+        transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+        opacity: 0;
+    }
+}
+
+/* Задержки для создания эффекта распространения электричества */
+.grid-line.vertical:nth-child(1) { animation-delay: 0s; }
+.grid-line.vertical:nth-child(2) { animation-delay: 0.1s; }
+.grid-line.vertical:nth-child(3) { animation-delay: 0.2s; }
+.grid-line.vertical:nth-child(4) { animation-delay: 0.3s; }
+.grid-line.vertical:nth-child(5) { animation-delay: 0.4s; }
+.grid-line.vertical:nth-child(6) { animation-delay: 0.5s; }
+.grid-line.vertical:nth-child(7) { animation-delay: 0.6s; }
+.grid-line.vertical:nth-child(8) { animation-delay: 0.7s; }
+.grid-line.vertical:nth-child(9) { animation-delay: 0.8s; }
+.grid-line.vertical:nth-child(10) { animation-delay: 0.9s; }
+
+.grid-line.horizontal:nth-child(11) { animation-delay: 0.05s; }
+.grid-line.horizontal:nth-child(12) { animation-delay: 0.15s; }
+.grid-line.horizontal:nth-child(13) { animation-delay: 0.25s; }
+.grid-line.horizontal:nth-child(14) { animation-delay: 0.35s; }
+.grid-line.horizontal:nth-child(15) { animation-delay: 0.45s; }
+.grid-line.horizontal:nth-child(16) { animation-delay: 0.55s; }
+.grid-line.horizontal:nth-child(17) { animation-delay: 0.65s; }
+.grid-line.horizontal:nth-child(18) { animation-delay: 0.75s; }
+.grid-line.horizontal:nth-child(19) { animation-delay: 0.85s; }
+
+/* Контейнер сетки */
+.grid-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Добавляем стили для контейнера номеров */
+.cell-numbers-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3; /* Поверх сетки */
+}
+
+/* Стили для номеров клеток */
+.cell-number {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 5px rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    backdrop-filter: blur(1px);
+}
+
+/* Добавляем анимацию появления */
+.cell-number {
+    animation: numberAppear 0.5s ease-out;
+}
+
+@keyframes numberAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Добавляем стили для контейнера контуров */
+.number-outlines-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4; /* Поверх номеров */
+}
+
+/* Обновляем стили для контуров номеров */
+.number-outline {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 15px #fff,
+        0 0 20px #0ff,
+        0 0 35px #0ff,
+        0 0 40px #0ff;
+    transform: translate(-50%, -50%);
+    animation: numberGlow 3s infinite ease-in-out;
+}
+
+/* Обновляем анимацию для номеров */
+@keyframes numberGlow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1);
+        text-shadow: 
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #0ff,
+            0 0 20px #0ff,
+            0 0 35px #0ff;
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+        text-shadow: 
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 30px #0ff,
+            0 0 40px #0ff,
+            0 0 50px #0ff,
+            0 0 60px #0ff;
+    }
+}
+
+/* Добавляем эффект ореола вокруг номеров */
+.number-outline::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(0, 255, 255, 0.2) 0%,
+        rgba(0, 255, 255, 0.1) 50%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: haloEffect 3s infinite ease-in-out;
+}
+
+@keyframes haloEffect {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+}
+
+/* Добавляем стили для canvas с контурами */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    mix-blend-mode: overlay; /* Это поможет контурам лучше смешиваться с фоном */
+}
+
+/* Контейнер для контуров номеров */
+.numbers-outline-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Стиль для контуров номеров */
+.number-outline {
+    position: absolute;
+    font-family: Arial, sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: transparent;
+    -webkit-text-stroke: 1px white;
+    text-stroke: 1px white;
+    transform: translate(-50%, -50%);
+    text-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff;
+    animation: outlineGlow 2s infinite ease-in-out;
+}
+
+@keyframes outlineGlow {
+    0%, 100% {
+        text-shadow: 
+            0 0 2px #fff,
+            0 0 4px #fff;
+        opacity: 0.7;
+    }
+    50% {
+        text-shadow: 
+            0 0 2px #fff,
+            0 0 4px #fff,
+            0 0 6px #fff,
+            0 0 8px #fff;
+        opacity: 1;
+    }
+}
+
+/* Обновляем стили для золотой клетки (фишки) */
+.golden-cell {
+    position: absolute;
+    width: 70px; /* Увеличиваем размер фишки */
+    height: 70px;
+    background: radial-gradient(circle, rgba(255,223,0,1) 0%, rgba(255,200,0,0.9) 50%, rgba(255,180,0,0.7) 80%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.8),
+        0 0 30px rgba(255, 215, 0, 0.5),
+        0 0 45px rgba(255, 215, 0, 0.3);
+    transform: translate(-50%, -50%); /* Центрируем относительно позиции */
+    z-index: 100;
+    transition: all 0.8s ease-in-out;
+    /* Добавляем центрирование для текста */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif; /* Красивый шрифт */
+    font-weight: bold;
+    font-size: 28px; /* Увеличиваем размер текста */
+    color: #622a0f; /* Глубокий коричневый для контраста */
+    text-shadow: 
+        0 0 2px white,
+        0 0 4px rgba(255, 255, 255, 0.8); /* Белое свечение вокруг текста */
+    animation: goldenPulse 2s infinite alternate; /* Добавляем пульсацию */
+}
+
+/* Анимация пульсации для фишки */
+@keyframes goldenPulse {
+    from {
+        box-shadow: 
+            0 0 15px rgba(255, 215, 0, 0.8),
+            0 0 30px rgba(255, 215, 0, 0.5),
+            0 0 45px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.9),
+            0 0 40px rgba(255, 215, 0, 0.7),
+            0 0 60px rgba(255, 215, 0, 0.5);
+    }
+}
+
+/* Эффекты для змей и стрел (обновленные) */
+.snake-effect {
+    animation: snakeFall 1.5s ease-in-out;
+}
+
+.ladder-effect {
+    animation: ladderRise 1.5s ease-in-out;
+}
+
+@keyframes snakeFall {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(0.8) rotate(180deg);
+        filter: brightness(0.7) hue-rotate(300deg);
+        box-shadow: 
+            0 0 30px rgba(139, 0, 0, 0.8),
+            0 0 50px rgba(139, 0, 0, 0.6);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+}
+
+@keyframes ladderRise {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        filter: brightness(1.5);
+        box-shadow: 
+            0 0 30px rgba(255, 223, 0, 0.9),
+            0 0 60px rgba(255, 223, 0, 0.7),
+            0 0 90px rgba(255, 223, 0, 0.5);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* Эффект Ом также нужно обновить для соответствия */
+.om-effect {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,223,0,0.5) 40%, transparent 80%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: omPulse 1.5s ease-out forwards;
+    z-index: 90;
+    pointer-events: none;
+}
+
+@keyframes omPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Стили для портала змеи */
+.snake-portal {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,0,0,0.8) 0%, rgba(80,0,0,0.6) 50%, rgba(40,0,0,0) 100%);
+    box-shadow: 
+        inset 0 0 20px rgba(139,0,0,0.9),
+        0 0 30px rgba(139,0,0,0.7);
+    transform: translate(-50%, -50%) scale(0);
+    animation: snakePortalOpen 1.5s ease-in-out forwards;
+    z-index: 95;
+}
+
+@keyframes snakePortalOpen {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Стили для волны света */
+.light-wave {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,223,0,0.3) 30%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: lightWaveExpand 1s ease-out forwards;
+    z-index: 95;
+}
+
+@keyframes lightWaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Стили для темной энергии */
+.dark-energy {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(80,0,0,0.7) 0%, rgba(40,0,0,0.3) 30%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: darkEnergyExpand 1s ease-in forwards;
+    z-index: 95;
+}
+
+@keyframes darkEnergyExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Удаляем следующие стили */
+.cell-numbers-container,
+.cell-number,
+.number-outline,
+.numbers-outline-container {
+    display: none;
+}
+
+/* Удаляем все стили, связанные с player */
+.player {
+    display: none;
+}
+
+/* Базовые стили для линий сетки */
+.grid-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Пресет "Электрический" */
+.grid-line.electric {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 255, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.5),
+        0 0 20px rgba(0, 255, 255, 0.3);
+    animation: electricPulse 1.5s infinite;
+}
+
+@keyframes electricPulse {
+    0%, 100% {
+        opacity: 0.3;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.5);
+    }
+}
+
+/* Пресет "Кристальный" */
+.grid-line.crystal {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.8),
+        rgba(200, 220, 255, 0.9),
+        rgba(255, 255, 255, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.4),
+        0 0 30px rgba(200, 220, 255, 0.3);
+    animation: crystalGlow 3s infinite;
+}
+
+@keyframes crystalGlow {
+    0%, 100% {
+        opacity: 0.5;
+        filter: hue-rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        filter: hue-rotate(45deg);
+    }
+}
+
+/* Пресет "Золотой" */
+.grid-line.golden {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.8),
+        rgba(255, 223, 0, 0.9),
+        rgba(255, 215, 0, 0.8),
+        transparent
+    );
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 223, 0, 0.3);
+    animation: goldenPulse 2s infinite;
+}
+
+@keyframes goldenPulse {
+    0%, 100% {
+        opacity: 0.5;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 0.8;
+        filter: brightness(1.3);
+    }
+}
+
+/* Пресет "Белый" */
+.grid-line.white {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    box-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.2),
+        0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Обновляем стили для контейнера кубика */
+.dice-container {
+    position: absolute;
+    left: 102%; /* Располагаем сразу за правым краем поля */
+    bottom: 12.5%; /* На уровне нижнего ряда (где клетка 9) */
+    perspective: 1000px;
+    z-index: 10;
+}
+
+.dice {
+    width: 50px; /* Немного уменьшаем размер кубика */
+    height: 50px;
+    position: relative;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform 1.5s ease-out;
+}
+
+/* Обновляем размеры граней */
+.dice-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    gap: 2px;
+    padding: 4px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Обновляем позиционирование граней */
+.front  { transform: translateZ(25px); }
+.back   { transform: translateZ(-25px) rotateY(180deg); }
+.right  { transform: translateX(25px) rotateY(90deg); }
+.left   { transform: translateX(-25px) rotateY(-90deg); }
+.top    { transform: translateY(-25px) rotateX(90deg); }
+.bottom { transform: translateY(25px) rotateX(-90deg); }
+
+/* Анимация броска */
+.rolling {
+    animation: roll 1.5s ease-out;
+}
+
+@keyframes roll {
+    0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+    100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(360deg); }
+}
+
+/* Обновляем стили для точек на кубике */
+.dot {
+    background: #333;
+    border-radius: 50%;
+    margin: 2px;
+    width: 8px;
+    height: 8px;
+    align-self: center;
+    justify-self: center;
+}
+
+/* Позиции точек */
+.center { grid-area: 2 / 2 / 3 / 3; }
+.top-left { grid-area: 1 / 1 / 2 / 2; }
+.top-right { grid-area: 1 / 3 / 2 / 4; }
+.bottom-left { grid-area: 3 / 1 / 4 / 2; }
+.bottom-right { grid-area: 3 / 3 / 4 / 4; }
+.center-left { grid-area: 2 / 1 / 3 / 2; }
+.center-right { grid-area: 2 / 3 / 3 / 4; }
+
+/* Добавляем тень для объемности */
+.dice-face {
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для неонового кубика */
+.dice.neon {
+    width: 60px;
+    height: 60px;
+    transform-style: preserve-3d;
+    transition: transform 1.5s ease-out;
+}
+
+.dice.neon .dice-face {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #0ff;
+    box-shadow: 
+        0 0 10px #0ff,
+        inset 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.neon-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    color: #fff;
+    text-shadow: 
+        0 0 5px #0ff,
+        0 0 10px #0ff,
+        0 0 20px #0ff;
+    animation: neonPulse 1.5s infinite alternate;
+}
+
+@keyframes neonPulse {
+    from {
+        text-shadow: 
+            0 0 5px #0ff,
+            0 0 10px #0ff,
+            0 0 20px #0ff;
+    }
+    to {
+        text-shadow: 
+            0 0 10px #0ff,
+            0 0 20px #0ff,
+            0 0 30px #0ff,
+            0 0 40px #0ff;
+    }
+}
+
+/* Стили для кристального кубика */
+.dice.crystal {
+    width: 60px;
+    height: 60px;
+    transform-style: preserve-3d;
+    transition: transform 1.5s ease-out;
+}
+
+.dice.crystal .dice-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.2),
+        inset 0 0 15px rgba(255, 255, 255, 0.1);
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 10px;
+}
+
+/* Добавляем уникальные стили для каждой грани для визуального различия */
+.dice.crystal .front { 
+    transform: translateZ(30px); 
+    background: rgba(255, 255, 255, 0.15);
+}
+.dice.crystal .back { 
+    transform: translateZ(-30px) rotateY(180deg); 
+    background: rgba(245, 245, 255, 0.15);
+}
+.dice.crystal .right { 
+    transform: translateX(30px) rotateY(90deg); 
+    background: rgba(255, 245, 255, 0.15);
+}
+.dice.crystal .left { 
+    transform: translateX(-30px) rotateY(-90deg); 
+    background: rgba(255, 255, 245, 0.15);
+}
+.dice.crystal .top { 
+    transform: translateY(-30px) rotateX(90deg); 
+    background: rgba(245, 255, 255, 0.15);
+}
+.dice.crystal .bottom { 
+    transform: translateY(30px) rotateX(-90deg); 
+    background: rgba(245, 255, 245, 0.15);
+}
+
+/* Стили для точек */
+.crystal-dot {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(
+        circle at 30%,
+        rgba(255, 255, 255, 1),
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0.2)
+    );
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3);
+    align-self: center;
+    justify-self: center;
+    animation: crystalGlow 2s infinite alternate;
+}
+
+/* Анимация для точек */
+@keyframes crystalGlow {
+    from {
+        box-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    to {
+        box-shadow: 
+            0 0 15px rgba(255, 255, 255, 0.7),
+            0 0 30px rgba(255, 255, 255, 0.5),
+            0 0 45px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Позиции точек */
+.center { grid-area: 2 / 2 / 3 / 3; }
+.top-left { grid-area: 1 / 1 / 2 / 2; }
+.top-right { grid-area: 1 / 3 / 2 / 4; }
+.bottom-left { grid-area: 3 / 1 / 4 / 2; }
+.bottom-right { grid-area: 3 / 3 / 4 / 4; }
+.center-left { grid-area: 2 / 1 / 3 / 2; }
+.center-right { grid-area: 2 / 3 / 3 / 4; }
+
+/* Анимация броска */
+.dice.crystal.rolling {
+    animation: crystalRoll 1.5s ease-out;
+}
+
+@keyframes crystalRoll {
+    0% { 
+        transform: rotateX(0) rotateY(0) rotateZ(0);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+    }
+    100% { 
+        transform: rotateX(720deg) rotateY(360deg) rotateZ(360deg);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Стили для магического кубика */
+.dice.magical {
+    width: 65px;
+    height: 65px;
+    transform-style: preserve-3d;
+}
+
+.dice.magical .dice-face {
+    background: #2a1b3d;
+    border: 2px solid #8a2be2;
+    box-shadow: 
+        0 0 15px rgba(138, 43, 226, 0.4),
+        inset 0 0 20px rgba(138, 43, 226, 0.2);
+}
+
+.rune {
+    font-family: 'Noto Sans Runic', sans-serif;
+    font-size: 32px;
+    color: #e6e6fa;
+    text-shadow: 0 0 10px #8a2be2;
+    animation: runeGlow 2s infinite alternate;
+}
+
+@keyframes runeGlow {
+    from { text-shadow: 0 0 10px #8a2be2; }
+    to { text-shadow: 0 0 20px #8a2be2, 0 0 30px #e6e6fa; }
+}
+
+/* Добавляем стили для эффектов специальных перемещений */
+.snake-effect {
+    animation: snakeFall 1.5s ease-in-out;
+}
+
+.ladder-effect {
+    animation: ladderRise 1.5s ease-in-out;
+}
+
+@keyframes snakeFall {
+    0% {
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+    50% {
+        transform: scale(0.8) translateY(20px) rotate(180deg);
+        filter: brightness(0.7) hue-rotate(300deg);
+        box-shadow: 
+            0 0 30px rgba(139, 0, 0, 0.8),
+            0 0 50px rgba(139, 0, 0, 0.6);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+}
+
+@keyframes ladderRise {
+    0% {
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.3) translateY(-40px);
+        filter: brightness(1.5);
+        box-shadow: 
+            0 0 30px rgba(255, 223, 0, 0.9),
+            0 0 60px rgba(255, 223, 0, 0.7),
+            0 0 90px rgba(255, 223, 0, 0.5);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+    }
+}
+
+/* Добавляем стили для новых эффектов */
+.invalid-move-wave {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,50,50,0.5) 0%, rgba(255,0,0,0.3) 50%, transparent 80%);
+    transform: translate(-50%, -50%);
+    animation: invalidWave 1.5s ease-out forwards;
+    z-index: 95;
+    pointer-events: none;
+}
+
+@keyframes invalidWave {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+.invalid-move {
+    animation: invalidPulse 0.5s 3 alternate !important;
+}
+
+@keyframes invalidPulse {
+    0% {
+        filter: brightness(1);
+        box-shadow: 
+            0 0 15px rgba(255, 215, 0, 0.8),
+            0 0 30px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        filter: brightness(1.3) hue-rotate(300deg);
+        box-shadow: 
+            0 0 15px rgba(255, 0, 0, 0.8),
+            0 0 30px rgba(255, 0, 0, 0.5),
+            0 0 45px rgba(255, 0, 0, 0.3);
+    }
+}
+
+/* Стили для эффекта победы */
+.victory-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: gold;
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: victory-explosion 2s ease-out forwards;
+}
+
+@keyframes victory-explosion {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(20) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+/* Стили для аудио-элемента (скрываем его) */
+#background-music {
+    display: none;
+}
+
+/* Стили для фишки в состоянии рождения */
+.birth-cell {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(148,0,211,0.7) 50%, rgba(72,61,139,0.6) 100%);
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    box-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(148, 0, 211, 0.5);
+    animation: birthGlow 3s infinite alternate;
+}
+
+/* Анимация свечения для фишки рождения */
+@keyframes birthGlow {
+    0% {
+        box-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(148, 0, 211, 0.5);
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        box-shadow: 
+            0 0 15px rgba(255, 255, 255, 0.9),
+            0 0 30px rgba(148, 0, 211, 0.7),
+            0 0 45px rgba(72, 61, 139, 0.4);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* Аура вокруг фишки рождения */
+.birth-aura {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(148, 0, 211, 0.3);
+    transform: translate(-50%, -50%);
+    z-index: 49;
+    animation: birthAura 4s infinite;
+}
+
+/* Анимация расширения ауры */
+@keyframes birthAura {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+        border-color: rgba(148, 0, 211, 0.5);
+    }
+    50% {
+        opacity: 0.4;
+        border-color: rgba(147, 112, 219, 0.3);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0;
+        border-color: rgba(230, 230, 250, 0.1);
+    }
+}
+
+/* Частицы энергии вокруг фишки рождения */
+.birth-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgba(176, 196, 222, 0.7);
+    transform: translate(-50%, -50%);
+    z-index: 48;
+    pointer-events: none;
+    animation: birthParticle 4s infinite;
+}
+
+/* Анимация движения частиц */
+@keyframes birthParticle {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(10px);
+        opacity: 0.2;
+    }
+    25% {
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg) translateX(25px);
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(10px);
+        opacity: 0.2;
+    }
+}
+
+/* Эффект трансформации при выпадении 6 */
+.birth-transformation {
+    animation: birthTransform 2s forwards;
+}
+
+@keyframes birthTransform {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        filter: brightness(3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        filter: brightness(5);
+        opacity: 0;
+    }
+}
+
+/* Вспышка света при рождении */
+.birth-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    animation: birthFlash 2s forwards;
+}
+
+@keyframes birthFlash {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Эффект пульсации при неудачном броске */
+.birth-pulse {
+    animation: birthPulse 1s;
+}
+
+@keyframes birthPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    25% {
+        transform: translate(-50%, -50%) scale(1.2);
+        filter: hue-rotate(30deg) brightness(1.2);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(0.9);
+        filter: hue-rotate(60deg) brightness(0.9);
+    }
+    75% {
+        transform: translate(-50%, -50%) scale(1.1);
+        filter: hue-rotate(30deg) brightness(1.1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+}
+
+/* Стиль для сияния победы */
+.victory-glow {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,255,255,0.9) 30%, rgba(255,215,0,0.5) 70%, rgba(255,255,255,0) 100%);
+    transform: translate(-50%, -50%);
+    z-index: 47;
+    animation: victoryPulse 2s infinite alternate;
+    pointer-events: none;
+    filter: blur(3px);
+}
+
+@keyframes victoryPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Стили для эффекта чакры */
+.chakra-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+    animation: chakraPulse 2s ease-in-out forwards, chakraGlow 10s infinite alternate;
+}
+
+@keyframes chakraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+    70% {
+        opacity: 0.85;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+@keyframes chakraGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.3);
+    }
+}
+
+@keyframes chakraFadeOut {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+}
+
+/* Обновленные цвета для разных чакр с учетом реальных цветов клеток */
+.chakra-glow.chakra-5 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,0,0,0.3) 30%, rgba(139,0,0,0.2) 60%, rgba(139,0,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,0,0,0.5),
+        0 0 60px 30px rgba(255,0,0,0.3),
+        0 0 90px 45px rgba(255,0,0,0.2),
+        0 0 120px 60px rgba(255,0,0,0.1);
+    filter: hue-rotate(0deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-14 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,140,0,0.3) 30%, rgba(205,92,0,0.2) 60%, rgba(205,92,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,140,0,0.5),
+        0 0 60px 30px rgba(255,140,0,0.3),
+        0 0 90px 45px rgba(255,140,0,0.2),
+        0 0 120px 60px rgba(255,140,0,0.1);
+    filter: hue-rotate(25deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-23 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,0,0.3) 30%, rgba(204,204,0,0.2) 60%, rgba(204,204,0,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,255,0,0.5),
+        0 0 60px 30px rgba(255,255,0,0.3),
+        0 0 90px 45px rgba(255,255,0,0.2),
+        0 0 120px 60px rgba(255,255,0,0.1);
+    filter: hue-rotate(45deg) saturate(150%) brightness(130%);
+}
+
+.chakra-glow.chakra-32 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(46,204,113,0.3) 30%, rgba(39,174,96,0.2) 60%, rgba(39,174,96,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(46,204,113,0.5),
+        0 0 60px 30px rgba(46,204,113,0.3),
+        0 0 90px 45px rgba(46,204,113,0.2),
+        0 0 120px 60px rgba(46,204,113,0.1);
+    filter: hue-rotate(100deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-41 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(52,152,219,0.3) 30%, rgba(41,128,185,0.2) 60%, rgba(41,128,185,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(52,152,219,0.5),
+        0 0 60px 30px rgba(52,152,219,0.3),
+        0 0 90px 45px rgba(52,152,219,0.2),
+        0 0 120px 60px rgba(52,152,219,0.1);
+    filter: hue-rotate(180deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-50 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(93,63,211,0.3) 30%, rgba(75,0,130,0.2) 60%, rgba(75,0,130,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(93,63,211,0.5),
+        0 0 60px 30px rgba(93,63,211,0.3),
+        0 0 90px 45px rgba(93,63,211,0.2),
+        0 0 120px 60px rgba(93,63,211,0.1);
+    filter: hue-rotate(240deg) saturate(150%) brightness(120%);
+}
+
+.chakra-glow.chakra-59 {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(173,68,233,0.3) 30%, rgba(138,43,226,0.2) 60%, rgba(138,43,226,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(173,68,233,0.5),
+        0 0 60px 30px rgba(173,68,233,0.3),
+        0 0 90px 45px rgba(173,68,233,0.2),
+        0 0 120px 60px rgba(173,68,233,0.1);
+    filter: hue-rotate(275deg) saturate(150%) brightness(120%);
+}
+
+/* Золотой эффект Ом (оставляем для сравнения) */
+.chakra-glow.chakra-gold {
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,223,0,0.3) 30%, rgba(218,165,32,0.2) 60%, rgba(218,165,32,0) 80%);
+    box-shadow: 
+        0 0 30px 15px rgba(255,223,0,0.5),
+        0 0 60px 30px rgba(255,223,0,0.3),
+        0 0 90px 45px rgba(255,223,0,0.2),
+        0 0 120px 60px rgba(255,223,0,0.1);
+    filter: sepia(50%) saturate(400%) hue-rotate(10deg) brightness(130%);
+}
+
+/* Улучшенная пульсация для эффекта чакр */
+.chakra-pulse {
+    animation: chakraInnerPulse 5s infinite alternate;
+}
+
+@keyframes chakraInnerPulse {
+    0% {
+        box-shadow: 
+            0 0 30px 15px rgba(255,255,255,0.2),
+            0 0 60px 30px rgba(255,255,255,0.1),
+            0 0 90px 45px rgba(255,255,255,0.05);
+        filter: blur(0px);
+    }
+    50% {
+        box-shadow: 
+            0 0 40px 20px rgba(255,255,255,0.3),
+            0 0 80px 40px rgba(255,255,255,0.15),
+            0 0 120px 60px rgba(255,255,255,0.1);
+        filter: blur(2px);
+    }
+    100% {
+        box-shadow: 
+            0 0 50px 25px rgba(255,255,255,0.4),
+            0 0 100px 50px rgba(255,255,255,0.2),
+            0 0 150px 75px rgba(255,255,255,0.1);
+        filter: blur(0px);
+    }
+}
+
+/* Улучшенные частицы энергии */
+.chakra-particle {
+    position: absolute;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+    opacity: 0;
+}
+
+.chakra-particle-inner {
+    animation: chakraParticleInner 4s ease-out;
+}
+
+.chakra-particle-outer {
+    animation: chakraParticleOuter 6s ease-out;
+}
+
+@keyframes chakraParticleInner {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(10) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes chakraParticleOuter {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(20) rotate(-180deg);
+        opacity: 0;
+    }
+}
+
+/* Улучшенная центральная вспышка */
+.central-chakra-glow {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 12;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: centralChakraGlow 3s ease-out;
+    filter: blur(2px);
+}
+
+@keyframes centralChakraGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.1);
+        opacity: 0;
+    }
+}
+
+/* Стили для простого 2D кубика */
+.dice-2d {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0;
+    cursor: pointer;
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.3),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dice-2d::before {
+    content: '';
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.9;
+}
+
+.dice-2d[data-value="1"]::before { background-image: url('images/dice-1.png'); }
+.dice-2d[data-value="2"]::before { background-image: url('images/dice-2.png'); }
+.dice-2d[data-value="3"]::before { background-image: url('images/dice-3.png'); }
+.dice-2d[data-value="4"]::before { background-image: url('images/dice-4.png'); }
+.dice-2d[data-value="5"]::before { background-image: url('images/dice-5.png'); }
+.dice-2d[data-value="6"]::before { background-image: url('images/dice-6.png'); }
+
+.dice-value {
+    position: absolute;
+    opacity: 0;
+    font-size: 0;
+}
+
+.dice-2d.rolling {
+    animation: dice2dRoll 1s ease-out;
+}
+
+@keyframes dice2dRoll {
+    0% { transform: scale(1) rotate(0); }
+    20% { transform: scale(0.8) rotate(180deg); }
+    40% { transform: scale(1.1) rotate(360deg); }
+    60% { transform: scale(0.9) rotate(540deg); }
+    80% { transform: scale(1.05) rotate(720deg); }
+    100% { transform: scale(1) rotate(720deg); }
+}
+
+/* Стили для текстового кубика */
+.dice-text {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.2),
+        inset 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dice-number {
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.7),
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.dice-text.rolling {
+    animation: textDiceRoll 1s ease-out;
+}
+
+@keyframes textDiceRoll {
+    0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+    50% { transform: scale(0.8); box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+}
+
+/* Стили для SVG-кубика */
+.dice-svg {
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.dice-bg {
+    fill: rgba(255, 255, 255, 0.1);
+    stroke: rgba(255, 255, 255, 0.5);
+    stroke-width: 2;
+}
+
+.dice-dot {
+    fill: white;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+}
+
+.dice-svg .dice-value {
+    position: absolute;
+    opacity: 0;
+    font-size: 0;
+}
+
+.dice-svg.rolling {
+    animation: svgDiceRoll 1s ease-out;
+}
+
+@keyframes svgDiceRoll {
+    0% { transform: scale(1) rotate(0); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
+    50% { transform: scale(0.8) rotate(360deg); filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.7)); }
+    100% { transform: scale(1) rotate(720deg); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
+} 
+
+/* Стили для эффекта движения фишки */
+.movement-trail {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+    animation: trailFade 0.8s forwards;
+}
+
+@keyframes trailFade {
+    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+}
+
+/* Стили для подсветки целевой клетки */
+.cell-highlight {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.5) 0%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0) 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 5;
+    animation: cellGlow 1s forwards;
+}
+
+@keyframes cellGlow {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+/* Стили для видео-контейнеров */
+.video-container {
+    width: 240px;
+    background: rgba(20, 22, 26, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background: #000;
+    overflow: hidden;
+}
+
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Зеркальное отображение */
+}
+
+.connection-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.connection-status.connected {
+    background: rgba(0, 180, 0, 0.6);
+}
+
+.connection-status.error {
+    background: rgba(180, 0, 0, 0.6);
+}
+
+.participant-name {
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.video-controls {
+    display: flex;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.video-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin: 0 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.video-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.video-btn.muted {
+    background: rgba(255, 0, 0, 0.3);
+}
+
+.video-icon, .audio-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.video-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>');
+}
+
+.video-btn.muted .video-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M21 6.5l-4 4V7c0-.55-.45-1-1-1H9.82L21 17.18V6.5zM3.27 2L2 3.27 4.73 6H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.54-.18L19.73 21 21 19.73 3.27 2z"/></svg>');
+}
+
+.audio-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>');
+}
+
+.video-btn.muted .audio-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/></svg>');
+}
+
+/* Стили для правой секции с видео игрока и колбой */
+.right-section {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для контейнера кармы */
+.karma-container {
+    width: 100px;
+    height: 300px;
+    margin: 10px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.karma-flask {
+    width: 80px;
+    height: 220px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flask-top {
+    width: 30px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px 15px 0 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-bottom: none;
+}
+
+.flask-neck {
+    width: 20px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+    border-right: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.flask-body {
+    width: 70px;
+    height: 160px;
+    background: rgba(20, 20, 30, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 35px 35px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.1),
+        inset 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.flask-bottom {
+    width: 50px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0 0 25px 25px;
+    margin-top: 3px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.karma-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to bottom, 
+        rgba(138, 43, 226, 0.7) 0%, 
+        rgba(75, 0, 130, 0.8) 50%, 
+        rgba(138, 43, 226, 0.9) 100%);
+    transition: height 2s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 
+        0 0 10px rgba(138, 43, 226, 0.5),
+        0 0 20px rgba(138, 43, 226, 0.3);
+    z-index: 1;
+}
+
+.karma-bubbles {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    bottom: 0;
+    animation: bubbleRise linear forwards;
+}
+
+@keyframes bubbleRise {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+    }
+    70% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(-150px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.karma-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    margin-top: 10px;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+}
+
+.karma-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+}
+
+/* Анимация для частиц кармы */
+.karma-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    filter: blur(1px);
+    z-index: 100;
+    pointer-events: none;
+    animation: flyToFlask 2s ease-in forwards;
+}
+
+@keyframes flyToFlask {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.3) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Эффект свечения колбы при получении кармы */
+.flask-glow {
+    animation: flaskGlow 3s ease-out;
+}
+
+@keyframes flaskGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.7), 0 0 50px rgba(138, 43, 226, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Пульсация жидкости */
+.liquid-pulse {
+    animation: liquidPulse 1s ease-in-out;
+}
+
+@keyframes liquidPulse {
+    0% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.05);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+/* Анимация статуса подключения */
+@keyframes blink {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.connection-status {
+    animation: blink 1.5s infinite;
+}
+
+.connection-status.connected {
+    animation: none;
+}
+
+/* Стили для контейнера описания клеток */
+.cell-info-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto 0;
+    padding: 15px;
+    background: rgba(30, 35, 40, 0.8);
+    border-radius: 10px;
+    color: white;
+    box-shadow: 
+        0 0 15px rgba(0, 183, 255, 0.2),
+        inset 0 0 10px rgba(0, 183, 255, 0.1);
+    border: 1px solid rgba(0, 183, 255, 0.3);
+    backdrop-filter: blur(5px);
+    transition: all 0.5s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.cell-info-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cell-info-title {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    color: #4adfff;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(74, 223, 255, 0.5);
+}
+
+.cell-info-description {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+/* Анимация подсветки для контейнера */
+@keyframes infoGlow {
+    0%, 100% {
+        box-shadow: 
+            0 0 15px rgba(0, 183, 255, 0.2),
+            inset 0 0 10px rgba(0, 183, 255, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 25px rgba(0, 183, 255, 0.4),
+            inset 0 0 15px rgba(0, 183, 255, 0.2);
+    }
+}
+
+.cell-info-container.highlight {
+    animation: infoGlow 2s infinite ease-in-out;
+}
