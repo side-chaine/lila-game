@@ -33,59 +33,43 @@
      * Главная функция активации эффекта
      */
     function activateOMPreset() {
-        // Предотвращаем повторную активацию
+        console.log("Активация пресета ОМ при достижении клетки 68");
+        
+        // Проверяем, не активирован ли уже пресет
         if (document.body.classList.contains('om-preset-active')) {
-            console.log("Пресет ОМ уже активен, пропускаем повторную активацию");
-            return false;
+            console.log("Пресет ОМ уже активирован");
+            return;
         }
         
-        console.log("АКТИВАЦИЯ ПРЕСЕТА ОМ - НАЧАЛО ИНИЦИАЛИЗАЦИИ!");
-        
-        try {
-            // Очищаем предыдущие эффекты
-            cleanupEffects();
-            
-            // Деактивируем Mr. Transparent если активен
-            forceDeactivateMrTransparent();
-            
-            // Отмечаем начало активации
-            document.body.classList.add('om-preset-initializing');
-            
-            // 1. НЕМЕДЛЕННО: Создаем первые магические частицы
-            setTimeout(() => {
-                createInitialMagicalParticles();
-            }, settings.initialParticleDelay);
-            
-            // 2. Через 2 секунды: Начинаем плавный переход к полному эффекту
-            const transitionTimer = setTimeout(() => {
-                startTransitionToFullEffect();
-                
-                // Отмечаем что начался переход
-                document.body.classList.add('om-preset-transitioning');
-            }, settings.fullEffectDelay);
-            timers.push(transitionTimer);
-            
-            // 3. После завершения перехода: Активируем полный эффект
-            const fullEffectTimer = setTimeout(() => {
-                activateFullOMEffect();
-                
-                // Удаляем класс перехода и добавляем класс активного пресета
-                document.body.classList.remove('om-preset-transitioning');
-                document.body.classList.add('om-preset-active');
-                
-                // Обновляем текст в блоке описания
-                updateDescriptionText();
-            }, settings.fullEffectDelay + settings.transitionDuration);
-            timers.push(fullEffectTimer);
-            
-            // Добавляем стили анимации
-            addAnimationStyles();
-            
-            return true;
-        } catch (error) {
-            console.error("Ошибка при активации пресета ОМ:", error);
-            return false;
+        // Показываем сообщение в матричном комментарии если он доступен
+        if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+            window.MatrixComments.activateGreenMode();
+            window.MatrixComments.showMessage('Активация эффекта ОМ... Достигнуто состояние просветления.', 'Система');
         }
+        
+        // Добавляем класс для начала перехода
+        document.body.classList.add('om-preset-initializing');
+        
+        // Создаем исходные частицы
+        createInitialMagicalParticles();
+        
+        // Начинаем переход к полному эффекту с задержкой
+        setTimeout(startTransitionToFullEffect, 1000);
+        
+        // Обновляем текст описания
+        updateDescriptionText();
+        
+        // Добавляем пульсирующий эффект ко всему, что может его поддерживать
+        addPulsingEffect();
+        
+        // Отключаем нежелательные элементы, которые могут конфликтовать с эффектом
+        forceDeactivateMrTransparent();
+        
+        // Добавляем стили анимации, если они еще не добавлены
+        addAnimationStyles();
+        
+        // Добавляем наблюдателя за изменением классов для поддержания эффекта
+        setupCellObserver();
     }
     
     /**
@@ -156,65 +140,47 @@
     }
     
     /**
-     * Активирует полный эффект ОМ
+     * Запускает полный эффект ОМ
      */
     function activateFullOMEffect() {
-        try {
-            console.log("Активация ПОЛНОГО эффекта ОМ...");
-            
-            // Находим игровую доску
-            const gameBoard = document.querySelector('.game-board');
-            if (!gameBoard) return;
-            
-            // Создаем дополнительный контейнер для усиления эффекта золотого свечения
-            const glowOverlay = document.createElement('div');
-            glowOverlay.className = 'om-glow-overlay';
-            glowOverlay.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 5;
-                background: radial-gradient(circle at center, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 30%, transparent 70%);
-                animation: goldenPulse 6s infinite alternate;
-            `;
-            gameBoard.parentElement.appendChild(glowOverlay);
-            createdElements.push(glowOverlay);
-            
-            // Добавляем финальные частицы
-            const particlesContainer = document.querySelector('.om-particles-container');
-            if (particlesContainer) {
-                // Добавляем еще частиц для финального эффекта
-                for (let i = 0; i < settings.particleCount; i++) {
-                    createMagicalParticle(particlesContainer, false);
-                }
-            }
-            
-            // Применяем финальные фильтры к игровой доске с полной силой
-            gameBoard.style.animation = 'none'; // Сбрасываем текущую анимацию
-            setTimeout(() => {
-                // Устанавливаем новую анимацию после небольшой задержки
-                gameBoard.style.animation = 'pulseGoldenEffect 6s infinite alternate';
-            }, 50);
-            
-            // Отключаем переходы для мгновенного применения финальных фильтров
-            gameBoard.style.transition = 'none';
-            gameBoard.style.filter = `
-                sepia(${settings.sepia}%) 
-                saturate(${settings.saturation}%) 
-                hue-rotate(${settings.hueRotate}deg) 
-                brightness(${settings.maxBrightness}%)
-            `;
-            
-            // Добавляем пульсирующий эффект
-            addPulsingEffect();
-            
-            console.log("Полный эффект ОМ активирован!");
-        } catch (error) {
-            console.error("Ошибка при активации полного эффекта:", error);
+        console.log("Запуск полного эффекта ОМ");
+        
+        // Показываем сообщение в матричном комментарии если он доступен
+        if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+            window.MatrixComments.showMessage('Вибрация ОМ достигла максимальной интенсивности. Вы достигли Плана Абсолюта.', 'ИЗНАЧАЛЬНЫЙ ЗВУК');
         }
+        
+        // Убираем класс-маркер перехода
+        document.body.classList.remove('om-preset-transitioning');
+        
+        // Добавляем класс полной активации
+        document.body.classList.add('om-preset-active');
+        document.body.classList.add('om-preset-active-important');
+        
+        // Добавляем класс глобальной пульсации
+        document.body.classList.add('pulse-enabled');
+        
+        // Получаем игровую доску
+        const gameBoard = document.querySelector('.game-board, .board-container img');
+        if (gameBoard) {
+            // Добавляем приоритетный класс свечения
+            gameBoard.classList.add('golden-glow-priority');
+        }
+        
+        // Добавляем центральное свечение если его еще нет
+        createCentralGlow();
+        
+        // Создаем золотые частицы
+        createGoldenParticles();
+        
+        // Создаем водные круги
+        createWaterRipples();
+        
+        // Добавляем золотой оверлей
+        createGoldenOverlay();
+        
+        // Обновляем текст в боксе описания
+        updateDescriptionText(true);
     }
     
     /**
@@ -283,26 +249,37 @@
     }
     
     /**
-     * Обновляет текст в блоке описания
+     * Обновляет текст описания эффекта ОМ
      */
-    function updateDescriptionText() {
+    function updateDescriptionText(isFinal = false) {
+        // Находим контейнер описания
         const descriptionBox = document.querySelector('.cell-description-box');
         if (!descriptionBox) return;
         
-        const boxTitle = descriptionBox.querySelector('.box-title');
-        const boxText = descriptionBox.querySelector('.box-text');
-        
-        if (boxTitle) {
-            boxTitle.textContent = 'БОЖЕСТВЕННОЕ ОТКРОВЕНИЕ';
-            boxTitle.classList.add('golden-text');
-        }
-        
-        if (boxText) {
-            boxText.innerHTML = 'Вы достигли Плана Абсолюта (68). Это высшая точка духовного развития, где происходит осознание единства всего сущего и слияние с Божественным.';
-            boxText.classList.add('golden-text');
-        }
-        
+        // Добавляем класс ОМ-описания
         descriptionBox.classList.add('om-description');
+        
+        // Находим заголовок и текст
+        const titleElement = descriptionBox.querySelector('.box-title');
+        const textElement = descriptionBox.querySelector('.box-text');
+        
+        if (titleElement && textElement) {
+            // Обновляем текст в зависимости от стадии эффекта
+            if (isFinal) {
+                titleElement.innerHTML = 'ИЗНАЧАЛЬНЫЙ ЗВУК';
+                textElement.innerHTML = 'Изначальный звук — это вибрация ОМ, первичная вибрация Вселенной. ' +
+                                      'Вы достигли Плана Абсолюта, высшей точки духовного пути.';
+                
+                // Показываем сообщение в матричном комментарии если он доступен
+                if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+                    window.MatrixComments.showMessage('Изначальный звук — это вибрация ОМ, первичная вибрация Вселенной.', 'ИЗНАЧАЛЬНЫЙ ЗВУК');
+                }
+            } else {
+                titleElement.innerHTML = 'БОЖЕСТВЕННОЕ ОТКРОВЕНИЕ';
+                textElement.innerHTML = 'Вы приближаетесь к Плану Абсолюта. ' +
+                                      'Вибрация ОМ наполняет ваше сознание...';
+            }
+        }
     }
     
     /**

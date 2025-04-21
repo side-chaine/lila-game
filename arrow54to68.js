@@ -127,46 +127,114 @@
     
     // Функция для визуального перемещения фишки на клетку 68
     function moveTokenToCell68() {
-        console.log("Визуально перемещаем фишку на клетку 68");
+        // Устанавливаем флаг, что происходит перемещение по стреле
+        window.isMovingToCell68 = true;
         
-        // Координаты клетки 68
+        // Показываем сообщение в матричном комментарии если он доступен
+        if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+            window.MatrixComments.showMessage('Активирована стрела восхождения. Ваше сознание устремляется к плану Абсолюта...', 'Система');
+        }
+        
+        // Пример координат клетки 68 (может потребоваться корректировка)
         const cell68X = 77.7; // Процент от ширины
         const cell68Y = 37.5; // Процент от высоты
         
-        // Получаем все возможные элементы, которые могут представлять фишку
-        const playerToken = document.querySelector('.player-token');
-        const trailDot = document.querySelector('.trail-dot');
-        const simpleTrailDot = document.querySelector('.simple-trail-dot');
-        const activeMarker = document.querySelector('.active-cell-marker');
+        // Создаем вспышку на клетке 54 перед началом движения
+        if (typeof window.createStrobeFlash === 'function') {
+            window.createStrobeFlash(54);
+        }
         
-        // Обновляем позицию всех элементов
-        [playerToken, trailDot, simpleTrailDot, activeMarker].forEach(element => {
-            if (element) {
-                element.style.left = `${cell68X}%`;
-                element.style.top = `${cell68Y}%`;
-                console.log(`Перемещен элемент ${element.className} на клетку 68`);
+        // Получаем фишку
+        const playerToken = document.querySelector('.player-token, .player');
+        if (!playerToken) {
+            console.error("Фишка игрока не найдена");
+            return;
+        }
+        
+        // Сохраняем текущее положение фишки
+        const startX = parseFloat(playerToken.style.left) || 0;
+        const startY = parseFloat(playerToken.style.top) || 0;
+        
+        // Изменяем внешний вид фишки
+        playerToken.classList.add('ascending-token');
+        
+        // Создаем эффект световой вспышки на фишке
+        const flashEffect = document.createElement('div');
+        flashEffect.className = 'token-flash-effect';
+        document.querySelector('.board-container').appendChild(flashEffect);
+        
+        // Анимация движения от клетки 54 к клетке 68
+        const animationDuration = 3000; // 3 секунды
+        const startTime = Date.now();
+        
+        function animateToken() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / animationDuration, 1);
+            
+            // Используем функцию плавности для более естественного движения
+            const easedProgress = easeInOutCubic(progress);
+            
+            // Рассчитываем текущую позицию
+            const currentX = startX + (cell68X - startX) * easedProgress;
+            const currentY = startY + (cell68Y - startY) * easedProgress;
+            
+            // Обновляем положение фишки
+            playerToken.style.left = `${currentX}%`;
+            playerToken.style.top = `${currentY}%`;
+            
+            // Обновляем положение светового эффекта
+            flashEffect.style.left = `${currentX}%`;
+            flashEffect.style.top = `${currentY}%`;
+            
+            // Создаем случайные искры на пути
+            if (Math.random() < 0.3) {
+                createPathSpark(currentX, currentY);
             }
-        });
-        
-        // Перемещаем все точки следа
-        const allTrailDots = document.querySelectorAll('.trail-dot, .simple-trail-dot, .forced-trail-dot');
-        allTrailDots.forEach(dot => {
-            dot.style.left = `${cell68X}%`;
-            dot.style.top = `${cell68Y}%`;
-        });
-        
-        // Если существуют специальные функции для перемещения следа, вызываем их
-        if (typeof window.moveTrailDot === 'function') {
-            window.moveTrailDot(68);
+            
+            // Продолжаем анимацию, если она не завершена
+            if (progress < 1) {
+                requestAnimationFrame(animateToken);
+            } else {
+                // Анимация завершена
+                setTimeout(() => {
+                    // Удаляем эффект вспышки
+                    flashEffect.remove();
+                    
+                    // Показываем сообщение в матричном комментарии если он доступен
+                    if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+                        window.MatrixComments.showMessage('Вы достигли клетки 68 - План Абсолюта!', 'Система');
+                    }
+                    
+                    // Создаем вспышку на клетке 68
+                    if (typeof window.createStrobeFlash === 'function') {
+                        window.createStrobeFlash(68);
+                    }
+                    
+                    // Обновляем позицию в игре
+                    window.currentPosition = 68;
+                    
+                    // Отмечаем, что перемещение завершено
+                    window.isMovingToCell68 = false;
+                    
+                    // Создаем индикатор на клетке 68
+                    createVisibleCell68Indicator();
+                    
+                    // Вызываем эффект завершения если доступен
+                    if (typeof window.activateOMPreset === 'function') {
+                        window.activateOMPreset();
+                    }
+                    
+                    // Создаем событие изменения позиции
+                    notifyPositionChange(68);
+                    
+                    // Добавляем специальные стили для клетки 68
+                    addCell68Styles();
+                }, 500);
+            }
         }
         
-        // Если есть функция moveToCell68, используем ее
-        if (typeof window.moveToCell68 === 'function') {
-            window.moveToCell68();
-        }
-        
-        // Создаем видимый индикатор на клетке 68
-        createVisibleCell68Indicator();
+        // Запускаем анимацию
+        animateToken();
     }
     
     // Функция для создания видимого индикатора на клетке 68
@@ -389,4 +457,40 @@
         notifyPositionChange: notifyPositionChange,
         showMessage: showMessage
     };
+
+    // Функция для создания искры на пути
+    function createPathSpark(x, y) {
+        const spark = document.createElement('div');
+        spark.className = 'path-spark';
+        
+        // Случайное смещение от основного пути
+        const offsetX = (Math.random() - 0.5) * 10;
+        const offsetY = (Math.random() - 0.5) * 10;
+        
+        spark.style.cssText = `
+            position: absolute;
+            left: calc(${x}% + ${offsetX}px);
+            top: calc(${y}% + ${offsetY}px);
+            width: ${3 + Math.random() * 6}px;
+            height: ${3 + Math.random() * 6}px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            filter: blur(1px) drop-shadow(0 0 2px white);
+            z-index: 1000;
+            pointer-events: none;
+            animation: sparkFade 1s forwards;
+        `;
+        
+        document.querySelector('.board-container').appendChild(spark);
+        
+        // Удаляем искру после анимации
+        setTimeout(() => {
+            spark.remove();
+        }, 1000);
+    }
+    
+    // Функция плавности для анимации
+    function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
 })(); 

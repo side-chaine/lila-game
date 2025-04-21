@@ -8,8 +8,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Игра Лиля</title>
+    <!-- Модуль исправления состояния игры -->
+    <script src="game-state-fixer.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="animations.css">
+    <link rel="stylesheet" href="matrix-comment.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         .game-container {
@@ -125,7 +128,6 @@
                     <div id="game-dice" class="text-dice click-invite">
                         <span class="click-text">click</span>
                     </div>
-                    <div id="six-counter" style="display:none;"></div>
                 </div>
                 
                 <!-- Добавляем БОК справа от игрового поля с приветственным текстом -->
@@ -140,7 +142,7 @@
                 </div>
             </div>
             
-            <div id="message"></div>
+            <div class="message">Бросьте кубик, чтобы начать игру</div>
         </div>
         
         <!-- Add video container for the player (right side) -->
@@ -416,18 +418,82 @@
         });
     </script>
 
-    <!-- Добавьте перед закрывающим тегом </body> -->
+    <!-- Добавляем обработчик для эффекта клетки 68 -->
     <script src="cell68-effect.js"></script>
+    
     <!-- Добавляем обработчик завершения игры -->
     <script src="end-game-handler.js"></script>
+
+    <!-- Добавляем матричную систему комментариев -->
+    <script src="matrix-comments.js"></script>
+    
+    <!-- Матричный комментатор -->
+    <script>
+        // Инициализация после загрузки страницы и всех скриптов
+        document.addEventListener('DOMContentLoaded', function() {
+            // Добавляем небольшую задержку, чтобы убедиться, что все скрипты загружены
+            setTimeout(function() {
+                // Проверяем доступность системы матричных комментариев
+                if (window.MatrixComments && typeof window.MatrixComments.init === 'function') {
+                    // Создаем кастомное событие для броска кубика
+                    window.addEventListener('diceRoll', function(e) {
+                        // Отправляем событие diceRolled для матричного комментатора
+                        document.dispatchEvent(new CustomEvent('diceRolled', {
+                            detail: {
+                                value: e.detail.result,
+                                isFirstRoll: window.currentPosition === 1 || !window.currentPosition
+                            }
+                        }));
+                    });
+                    
+                    // Создаем кастомное событие для изменения позиции
+                    if (typeof window.movePlayer === 'function') {
+                        const originalMovePlayer = window.movePlayer;
+                        window.movePlayer = function(newPosition) {
+                            const oldPosition = window.currentPosition || 1;
+                            
+                            // Вызываем оригинальную функцию
+                            const result = originalMovePlayer.apply(this, arguments);
+                            
+                            // Отправляем событие об изменении позиции
+                            document.dispatchEvent(new CustomEvent('gamePositionChanged', {
+                                detail: {
+                                    from: oldPosition,
+                                    to: newPosition,
+                                    position: newPosition
+                                }
+                            }));
+                            
+                            return result;
+                        };
+                        
+                        console.log("Функция перемещения перехвачена для матричного комментатора");
+                    }
+                    
+                    console.log("Слушатели событий для матричного комментатора установлены");
+                } else {
+                    console.warn("Система матричных комментариев не доступна");
+                }
+            }, 500);
+        });
+    </script>
 
     <!-- Добавляем дебаг-контролы -->
     <script src="debug-controls.js"></script>
 
-    <!-- Добавьте этот код в подходящее место в вашем index.html, например перед закрывающим тегом </body> -->
+    <!-- Панель отладки -->
     <div id="debug-controls" class="debug-panel">
         <button id="test-cell68-btn" class="debug-btn">Тест клетки 68</button>
         <button id="reset-pos-btn" class="debug-btn" style="margin-top: 5px;">Вернуть позицию</button>
     </div>
+    
+    <!-- Улучшенный модуль сообщений и ожидания шестерки -->
+    <script src="message-fix.js"></script>
+    
+    <!-- Модуль правила шестерок -->
+    <script src="six-rule.js"></script>
+    
+    <!-- Отладчик правила шестерок -->
+    <script src="six-rule-debugger.js"></script>
 </body>
 </html>

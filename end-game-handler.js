@@ -28,6 +28,12 @@
                 // Помечаем игру как завершенную
                 window.gameFinished = true;
                 
+                // Показываем сообщение в матричном комментарии если он доступен
+                if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+                    window.MatrixComments.activateGreenMode();
+                    window.MatrixComments.showMessage('Игра завершена! Вы достигли Плана Абсолюта - высшей точки духовного пути.', 'Система');
+                }
+                
                 // Отключаем кубик
                 disableDice();
                 
@@ -65,6 +71,11 @@
     // Функция, гарантирующая, что фишка визуально находится на клетке 68
     function ensureTokenVisuallyAt68() {
         console.log("Гарантируем, что фишка визуально находится на клетке 68");
+        
+        // Показываем сообщение в матричном комментарии если он доступен
+        if (window.MatrixComments && typeof window.MatrixComments.showMessage === 'function') {
+            window.MatrixComments.showMessage('Перемещение на План Абсолюта...', 'Система');
+        }
         
         // Координаты клетки 68
         const coords = getCellCoordinates(68);

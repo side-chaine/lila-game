@@ -1,0 +1,358 @@
+/**
+ * Matrix Comment System Styles
+ */
+
+.matrix-comments-container {
+    font-family: monospace;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(0, 183, 255, 0.5);
+    border-radius: 5px;
+    color: rgb(0, 250, 0);
+    padding: 10px;
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* Overrides for the game message */
+.message.matrix-active {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+.matrix-text-area {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: normal;
+    overflow: hidden;
+    width: 100%;
+}
+
+.matrix-message {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.matrix-message-content {
+    position: relative;
+    word-wrap: break-word;
+    word-spacing: 3px;
+    white-space: normal;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.matrix-message-header {
+    color: rgb(180, 255, 180);
+    font-weight: bold;
+    margin-bottom: 2px;
+    display: none; /* Hide the header/author label */
+}
+
+.matrix-char {
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    transition: all 0.1s ease;
+}
+
+/* Базовый эффект мерцания для всех символов */
+.matrix-char {
+    animation: matrix-flicker 5s infinite;
+    animation-delay: calc(var(--char-index, 0) * 0.1s);
+    animation-duration: calc(3s + var(--char-index, 0) * 0.5s);
+}
+
+/* Underscore/space styling */
+.matrix-char:empty::after {
+    content: ' ';
+    display: inline-block;
+    width: 0.5em;
+}
+
+/* Каждая пятая буква исчезает чаще */
+.matrix-char:nth-child(5n) {
+    animation: matrix-disappear 4s infinite;
+}
+
+/* Каждая третья буква мерцает */
+.matrix-char:nth-child(3n) {
+    animation: matrix-blink 3s infinite;
+}
+
+/* Эффект глитча для случайных букв */
+.matrix-char:nth-child(7n) {
+    animation: matrix-glitch 2.5s infinite;
+}
+
+.matrix-char.glow {
+    color: #fff;
+    text-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+    animation: matrix-glow 1.5s infinite alternate;
+}
+
+.matrix-char.scrambling {
+    color: #00ff00;
+    opacity: 0.7;
+}
+
+.matrix-char.scrambling::after {
+    content: attr(data-scramble);
+    position: absolute;
+    left: 0;
+    color: rgba(0, 255, 0, 0.7);
+}
+
+.matrix-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background-color: #0f0;
+    vertical-align: middle;
+    animation: cursor-blink 1s infinite;
+}
+
+/* Green matrix mode */
+.matrix-green-mode {
+    color: #00ff00;
+    text-shadow: 0 0 2px #00ff00;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: #00b7ff;
+    box-shadow: 0 0 15px rgba(0, 183, 255, 0.5), inset 0 0 15px rgba(0, 183, 255, 0.3);
+}
+
+.matrix-green-mode .matrix-char {
+    color: #00ff00;
+}
+
+.matrix-green-mode .matrix-char.glow {
+    color: #ffffff;
+    text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00;
+}
+
+.matrix-green-mode .matrix-message-header {
+    color: #00ffaa;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+/* Position the matrix container below the game board */
+.matrix-message-container {
+    position: relative;
+    margin: 10px auto;
+    width: 100%;
+    max-width: 768px;
+    min-height: 60px;
+    max-height: 100px;
+    overflow: auto;
+    background-color: rgba(0, 20, 0, 0.85);
+    border: 1.5px solid rgba(0, 183, 255, 0.3);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    box-shadow: 0 0 8px rgba(0, 183, 255, 0.3);
+    box-sizing: border-box;
+    animation: container-glow 4s ease-in-out infinite;
+}
+
+/* Add animation for container glow effect */
+@keyframes container-glow {
+    0%, 100% {
+        border-color: rgba(0, 183, 255, 0.25);
+        box-shadow: 0 0 8px rgba(0, 183, 255, 0.2);
+    }
+    50% {
+        border-color: rgba(0, 183, 255, 0.4);
+        box-shadow: 0 0 12px rgba(0, 183, 255, 0.35);
+    }
+}
+
+/* Add a subtle blue border to the scrollbar */
+.matrix-message-container::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: rgba(0, 20, 0, 0.85);
+}
+
+.matrix-message-container::-webkit-scrollbar-track {
+    background: rgba(0, 20, 0, 0.85);
+    border: 1px solid rgba(0, 183, 255, 0.1);
+}
+
+.matrix-message-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 183, 255, 0.5);
+    border-radius: 3px;
+}
+
+.matrix-message-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 183, 255, 0.7);
+}
+
+/* Animations */
+@keyframes matrix-glow {
+    0% {
+        text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+    }
+    100% {
+        text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    }
+}
+
+@keyframes cursor-blink {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Эффект исчезновения букв */
+@keyframes matrix-disappear {
+    0%, 45%, 55%, 100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    46%, 54% {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+}
+
+/* Эффект мерцания букв */
+@keyframes matrix-blink {
+    0%, 92%, 100% {
+        opacity: 1;
+    }
+    92.5%, 99.5% {
+        opacity: 0.3;
+    }
+}
+
+/* Эффект общего плавного мерцания */
+@keyframes matrix-flicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    91%, 93% {
+        opacity: 0.8;
+    }
+    92% {
+        opacity: 0.5;
+    }
+    94% {
+        opacity: 0.6;
+    }
+}
+
+/* Эффект глитча с искажением и сдвигом */
+@keyframes matrix-glitch {
+    0%, 100% {
+        transform: translate(0, 0) skew(0deg, 0deg);
+        opacity: 1;
+    }
+    88%, 90%, 92% {
+        transform: translate(-1px, 1px) skew(0.5deg, -0.5deg);
+        opacity: 0.9;
+        text-shadow: 0 0 1px rgba(0, 255, 0, 0.5);
+    }
+    89%, 91% {
+        transform: translate(1px, -1px) skew(-0.5deg, 0.5deg);
+        opacity: 0.8;
+        text-shadow: 0 0 2px rgba(0, 255, 0, 0.7);
+    }
+}
+
+/* Custom scrollbar */
+.matrix-comments-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.matrix-comments-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.matrix-comments-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 0, 0.5);
+    border-radius: 3px;
+}
+
+.matrix-comments-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 0, 0.8);
+}
+
+/* Добавляем анимацию для эффекта "пропадания букв" */
+@keyframes sparkFade {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}
+
+/* Анимация для эффекта светящейся дорожки */
+.token-flash-effect {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 15px white, 0 0 30px rgba(0, 255, 0, 0.8);
+    z-index: 999;
+    pointer-events: none;
+    animation: flashPulse 0.8s infinite alternate;
+}
+
+@keyframes flashPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* Matrix dots before cursor */
+.matrix-dot {
+    display: inline-block;
+    animation: matrix-dot-blink 1.5s infinite alternate;
+    margin-right: 1px;
+    color: #00ff00;
+}
+
+.matrix-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.matrix-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.matrix-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes matrix-dot-blink {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+} 
