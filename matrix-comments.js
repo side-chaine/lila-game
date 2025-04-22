@@ -587,6 +587,18 @@
         
         // Если текст уже содержит HTML-разметку, обрабатываем его особым образом
         if (/<[a-z][\s\S]*>/i.test(text)) {
+            // Обработка полных фраз перемещения (формат "Перемещение с клетки X на клетку Y")
+            text = text.replace(/(Перемещение\s+с\s+(?:клетки|поля)\s+\d+\s+на\s+(?:клетку|поле)\s+\d+)/gi,
+                function(match) {
+                    return `<span class="matrix-no-break">${match}</span>`;
+                });
+                
+            // Обработка фраз перемещения со змеей или стрелой
+            text = text.replace(/((?:Змея|Стрела)!\s+Перемещение\s+с\s+(?:клетки|поля)\s+\d+\s+на\s+(?:клетку|поле)\s+\d+)/gi,
+                function(match) {
+                    return `<span class="matrix-no-break">${match}</span>`;
+                });
+            
             // Обработка ссылок на клетки (формат "клетка X", "клетки X")
             text = text.replace(/(\s|^)(клетк[аиеу])\s+(\d+)(\s|$|\.|\,|\!|\?)/gi, 
                 function(match, before, word, number, after) {
@@ -627,6 +639,12 @@
             text = text.replace(/(выпало|бросок|кубик[а-я]*)\s+(\d+)/gi,
                 function(match, word, number) {
                     return `<span class="matrix-no-break">${word} <span class="dice-value">${number}</span></span>`;
+                });
+                
+            // Обработка фраз с предлогами "с", "на" и числами 
+            text = text.replace(/(\s|^)(с|на)\s+(\d+)(\s|$|\.|\,|\!|\?)/gi,
+                function(match, before, word, number, after) {
+                    return `${before}<span class="matrix-no-break">${word} <span class="cell-number">${number}</span></span>${after}`;
                 });
             
             return text;

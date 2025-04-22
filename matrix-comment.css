@@ -15,6 +15,21 @@
     box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
     z-index: 10;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box;
+    position: relative;
+    min-width: 200px;
+    max-width: 400px;
+    scrollbar-width: thin;
+    scrollbar-color: #33ff33 rgba(0, 0, 0, 0.3);
 }
 
 /* Overrides for the game message */
@@ -34,25 +49,24 @@
 }
 
 .matrix-message {
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    margin-bottom: 1em;
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .matrix-message-content {
-    position: relative;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    margin-left: 0.5em;
+    word-break: normal;
+    overflow-wrap: break-word;
     word-wrap: break-word;
-    word-spacing: 3px;
-    white-space: normal;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    max-width: 100%;
-    line-height: 1.6;
-    letter-spacing: 0.6px;
-    font-weight: 500;
     hyphens: none;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
 }
 
 .matrix-message-header {
@@ -390,6 +404,18 @@
     white-space: nowrap !important;
     display: inline-block !important;
     margin-right: 2px !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Для длинных неразрывных конструкций в мобильной версии */
+@media (max-width: 768px) {
+    .matrix-no-break {
+        max-width: 95%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 /* Стиль для блока "клетка X" */
