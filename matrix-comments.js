@@ -578,6 +578,65 @@
     }
 
     /**
+     * Обрабатывает текст сообщения и оборачивает номера клеток и важные фразы в специальные span-элементы
+     * @param {string} text - Исходный текст сообщения
+     * @returns {string} - Обработанный HTML с неразрывными элементами
+     */
+    function processMessageText(text) {
+        if (!text) return '';
+        
+        // Если текст уже содержит HTML-разметку, обрабатываем его особым образом
+        if (/<[a-z][\s\S]*>/i.test(text)) {
+            // Обработка ссылок на клетки (формат "клетка X", "клетки X")
+            text = text.replace(/(\s|^)(клетк[аиеу])\s+(\d+)(\s|$|\.|\,|\!|\?)/gi, 
+                function(match, before, word, number, after) {
+                    return `${before}<span class="cell-ref">${word} <span class="cell-number">${number}</span></span>${after}`;
+                });
+            
+            // Обработка ссылок на поля (формат "поле X", "поля X")
+            text = text.replace(/(\s|^)(пол[еяю])\s+(\d+)(\s|$|\.|\,|\!|\?)/gi, 
+                function(match, before, word, number, after) {
+                    return `${before}<span class="cell-ref">${word} <span class="cell-number">${number}</span></span>${after}`;
+                });
+            
+            // Обработка комбинаций ходов (например, "6-5", "6-5-4")
+            text = text.replace(/(\s|^|:)(\d+(?:-\d+)+)(\s|$|\.|\,|\!|\?)/g, 
+                function(match, before, combo, after) {
+                    return `${before}<span class="move-combination">${combo}</span>${after}`;
+                });
+            
+            // Выделение сообщений о стрелах и змеях
+            text = text.replace(/(стрел[аеуы]|змея|змеи)(\s*\!)?/gi, 
+                function(match) {
+                    return `<span class="special-move">${match}</span>`;
+                });
+            
+            // Выделение направлений (вверх, вниз, подъем, спуск)
+            text = text.replace(/(подъ[её]м|спуск|вверх|вниз)/gi, 
+                function(match) {
+                    return `<span class="direction-text">${match}</span>`;
+                });
+            
+            // Выделение слов "перемещение" и "ход"
+            text = text.replace(/(перемещение|ход)/gi, 
+                function(match) {
+                    return `<span class="matrix-no-break">${match}</span>`;
+                });
+            
+            // Обработка слов, связанных с кубиком (бросок, выпало и т.д.)
+            text = text.replace(/(выпало|бросок|кубик[а-я]*)\s+(\d+)/gi,
+                function(match, word, number) {
+                    return `<span class="matrix-no-break">${word} <span class="dice-value">${number}</span></span>`;
+                });
+            
+            return text;
+        } else {
+            // Для простого текста без HTML, просто возвращаем его
+            return text;
+        }
+    }
+
+    /**
      * Show a message in the matrix style
      * @param {string} text - The message text
      * @param {string|null} author - Optional author
@@ -588,22 +647,94 @@
             clearMatrixMessages();
         }
         
+        // Определяем, содержит ли текст HTML-разметку
+        const containsHtml = /<[a-z][\s\S]*>/i.test(text);
+        
         // Process text to add spaces between words if needed
         const processedText = text.replace(/_/g, ' ');
         
-        // Create the message object
-        const message = {
-            text: processedText,
-            author: null, // Always set author to null to remove "System" label
-            delay: config.defaultDelayBetweenMessages
-        };
+        // Дополнительно обрабатываем текст, чтобы избежать разрывов слов
+        const enhancedText = processMessageText(processedText);
         
-        // Add to message queue
-        state.messages.push(message);
-        
-        // If we're not currently typing a message, start
-        if (!state.isTyping) {
-            displayNextMessage();
+        if (containsHtml || /<[a-z][\s\S]*>/i.test(enhancedText)) {
+            // Если текст содержит HTML, используем другой подход для отображения
+            // Создаем контейнер и добавляем его в DOM
+            if (state.textArea) {
+                // Проверяем, не является ли сообщение просто обновлением последнего
+                // Если это продолжение предыдущего сообщения о броске кубика или ходе,
+                // обновляем существующее сообщение вместо создания нового
+                let shouldUpdate = false;
+                let lastMessageContent = null;
+                
+                if (state.textArea.lastChild && 
+                    state.textArea.lastChild.classList.contains('matrix-message')) {
+                    const lastMessage = state.textArea.lastChild;
+                    lastMessageContent = lastMessage.querySelector('.matrix-message-content');
+                    
+                    // Проверяем, является ли это продолжением сообщения о броске кубика или ходе
+                    if (lastMessageContent && 
+                        ((lastMessageContent.textContent.includes('Выпало') && enhancedText.includes('ходим')) ||
+                         (lastMessageContent.textContent.includes('ходим') && enhancedText.includes('Ход завершен')))) {
+                        shouldUpdate = true;
+                    }
+                }
+                
+                if (shouldUpdate && lastMessageContent) {
+                    // Обновляем существующее сообщение
+                    lastMessageContent.innerHTML = enhancedText;
+                    
+                    // Добавляем эффект мерцающего курсора
+                    const cursor = document.createElement('span');
+                    cursor.className = 'matrix-cursor';
+                    lastMessageContent.appendChild(cursor);
+                } else {
+                    // Если не обновляем существующее, то создаем новое сообщение
+                    // Очищаем предыдущие сообщения, если комментатор переполнен
+                    if (state.textArea.children.length > config.maxMessages) {
+                        // Удаляем самое старое сообщение
+                        if (state.textArea.firstChild) {
+                            state.textArea.removeChild(state.textArea.firstChild);
+                        }
+                    }
+                    
+                    // Создаем контейнер сообщения
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('matrix-message');
+                    state.textArea.appendChild(messageElement);
+                    
+                    // Создаем контейнер содержимого
+                    const contentElement = document.createElement('div');
+                    contentElement.classList.add('matrix-message-content');
+                    messageElement.appendChild(contentElement);
+                    
+                    // Устанавливаем HTML-содержимое напрямую
+                    contentElement.innerHTML = enhancedText;
+                    
+                    // Добавляем эффект мерцающего курсора
+                    const cursor = document.createElement('span');
+                    cursor.className = 'matrix-cursor';
+                    contentElement.appendChild(cursor);
+                    
+                    // Прокручиваем до последнего сообщения
+                    state.container.scrollTop = state.container.scrollHeight;
+                }
+            }
+        } else {
+            // Стандартный подход для текста без HTML
+            // Create the message object
+            const message = {
+                text: enhancedText,
+                author: null, // Always set author to null to remove "System" label
+                delay: config.defaultDelayBetweenMessages
+            };
+            
+            // Add to message queue
+            state.messages.push(message);
+            
+            // If we're not currently typing a message, start
+            if (!state.isTyping) {
+                displayNextMessage();
+            }
         }
     }
 
@@ -660,6 +791,12 @@
             const cellOrField = Math.random() > 0.5 ? "клетке" : "поле";
             let message = `Выпало ${diceValue}. `;
             
+            // Получаем состояние обработчика последовательности шестерок, если он доступен
+            let sixesState = null;
+            if (window.DiceSequenceHandler && typeof window.DiceSequenceHandler.getState === 'function') {
+                sixesState = window.DiceSequenceHandler.getState();
+            }
+            
             // Проверяем, началась ли игра (через несколько проверок для надежности)
             const gameStarted = window.gameStarted || 
                                 currentPosition > 1 || 
@@ -675,6 +812,25 @@
                     message += waitingSixPhrases[randomIndex];
                 }
             } 
+            // Случай когда выпала шестерка и это уже не первый бросок
+            else if (diceValue === 6 && gameStarted) {
+                // Если у нас есть информация о последовательности шестерок
+                if (sixesState && sixesState.diceSequence) {
+                    const sixCount = sixesState.diceSequence.length;
+                    
+                    if (sixCount === 1) {
+                        message += "Выпала шестерка! Бросайте снова.";
+                    } else if (sixCount === 2) {
+                        message += "Выпала вторая шестерка подряд! Бросайте снова.";
+                    } else if (sixCount === 3 && !sixesState.sixesBurned) {
+                        message += "Три шестерки подряд! Осторожно, они сейчас сгорят!";
+                    } else if (sixesState.sixesBurned) {
+                        message += "Еще одна шестерка! Ваши шестерки возрождаются!";
+                    }
+                } else {
+                    message += "Выпала шестерка! Бросайте снова.";
+                }
+            }
             // Special case for cell 67 - need to roll 5 to reach cell 72
             else if (currentPosition === 67) {
                 if (diceValue > 5) {
@@ -727,6 +883,16 @@
             else if (currentPosition + diceValue > 72) {
                 const neededValue = 72 - currentPosition;
                 message += `Перебор! Вам нужно выбросить точно ${neededValue} для достижения финальной клетки.`;
+            }
+            // Отображение сообщения о результатах броска после накопленных шестерок
+            else if (sixesState && sixesState.diceSequence.length > 0 && diceValue !== 6) {
+                if (sixesState.sixesBurned) {
+                    message += `Шестерки сгорели! Вы перемещаетесь на ${diceValue} шагов.`;
+                } else {
+                    // Формируем сообщение о ходе на все накопленные шестерки и текущее значение
+                    const allSixes = sixesState.diceSequence.slice(0, -1).map(() => 6).join("-");
+                    message += `Вы ходите на ${allSixes}-${diceValue} шагов!`;
+                }
             }
             // Normal movement
             else {

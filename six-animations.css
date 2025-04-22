@@ -1,0 +1,194 @@
+/* 
+ * Стили для анимаций шестерок и их эффектов  
+ */
+
+/* Анимация для огненного "сгорания" трех шестерок */
+@keyframes burnSixAnimation {
+    0% { 
+        transform: scale(1); 
+        opacity: 1; 
+        text-shadow: 0 0 5px rgba(255, 165, 0, 0.7);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    25% {
+        transform: scale(1.3); 
+        opacity: 0.9; 
+        text-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 0 30px rgba(255, 100, 0, 0.6);
+        filter: hue-rotate(20deg) brightness(1.3);
+    }
+    50% { 
+        transform: scale(1.5); 
+        opacity: 0.7; 
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 100, 0, 0.7);
+        filter: hue-rotate(40deg) brightness(1.5);
+    }
+    75% {
+        transform: scale(1.2); 
+        opacity: 0.5; 
+        text-shadow: 0 0 25px rgba(255, 0, 0, 0.7), 0 0 35px rgba(255, 80, 0, 0.6);
+        filter: hue-rotate(30deg) brightness(1.2);
+    }
+    100% { 
+        transform: scale(0.1); 
+        opacity: 0; 
+        text-shadow: 0 0 30px rgba(255, 0, 0, 0);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+}
+
+/* Анимация для эффекта возрождения шестерок */
+@keyframes reviveSixAnimation {
+    0% { 
+        transform: scale(0.1); 
+        opacity: 0; 
+        filter: hue-rotate(0deg) brightness(1);
+        text-shadow: 0 0 5px rgba(0, 100, 255, 0.5);
+    }
+    25% {
+        transform: scale(0.8); 
+        opacity: 0.5; 
+        filter: hue-rotate(90deg) brightness(1.2);
+        text-shadow: 0 0 15px rgba(0, 150, 255, 0.7);
+    }
+    50% { 
+        transform: scale(1.5); 
+        opacity: 0.9; 
+        filter: hue-rotate(180deg) brightness(1.5);
+        text-shadow: 0 0 30px rgba(0, 191, 255, 0.9), 0 0 50px rgba(0, 191, 255, 0.7);
+    }
+    75% {
+        transform: scale(1.2); 
+        opacity: 0.95; 
+        filter: hue-rotate(270deg) brightness(1.3);
+        text-shadow: 0 0 25px rgba(0, 180, 255, 0.8);
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1; 
+        filter: hue-rotate(360deg) brightness(1);
+        text-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
+    }
+}
+
+/* Стили для контейнера анимации шестерок */
+.sixes-animation-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sixes-animation-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Стили для анимированных цифр шестерок */
+.animated-six {
+    font-size: 140px;
+    font-weight: bold;
+    margin: 0 20px;
+    color: #ffcc00;
+    position: relative;
+    display: inline-block;
+    transform-origin: center;
+}
+
+.animated-six.burning {
+    animation: burnSixAnimation 2s forwards;
+}
+
+.animated-six.reviving {
+    animation: reviveSixAnimation 2.5s forwards;
+}
+
+/* Стили для счетчика шестерок */
+.six-counter {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 153, 0, 0.7);
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 9000;
+    box-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+}
+
+.six-counter .six-icon {
+    color: #ff9900;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.six-counter .counter-value {
+    color: #ffcc00;
+    font-weight: bold;
+}
+
+/* Частицы огня для эффекта сгорания */
+.fire-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: orange;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Частицы воды/льда для эффекта возрождения */
+.water-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #00bfff;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Анимация для частиц огня */
+@keyframes fireParticleAnimation {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+    100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+
+/* Анимация для частиц воды */
+@keyframes waterParticleAnimation {
+    0% { transform: translate(0, 0) scale(0.5); opacity: 0.5; }
+    50% { transform: translate(calc(var(--x) * 0.5), calc(var(--y) * 0.5)) scale(1); opacity: 0.8; }
+    100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+
+/* Стили для текста в комментаторе при выпадении шестерок */
+.matrix-message .six-emphasis {
+    color: #ff9900;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 153, 0, 0.7);
+}
+
+/* Пульсация счетчика при обновлении */
+@keyframes counterPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.six-counter.updated {
+    animation: counterPulse 0.3s ease-in-out;
+} 

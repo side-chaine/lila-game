@@ -1,0 +1,881 @@
+/**
+ * Обработчик последовательностей кубика и специальных случаев с шестерками
+ * 
+ * Этот модуль отслеживает последовательные выпадения шестерок и реализует следующие функции:
+ * 1. Отображение счетчика шестерок в комментаторе
+ * 2. Обработка перемещений при выпадении нешестерки после одной или нескольких шестерок
+ * 3. "Сгорание" трех шестерок при выпадении трех шестерок подряд
+ * 4. "Возрождение" всех шестерок при выпадении четвертой шестерки после трех
+ */
+(function() {
+    // Состояние обработчика последовательностей
+    const state = {
+        // Массив для хранения последовательности выпавших значений
+        diceSequence: [],
+        
+        // Флаг, показывающий, что три шестерки "сгорели"
+        sixesBurned: false,
+        
+        // Общий счетчик выпавших шестерок
+        totalSixesCounter: 0,
+        
+        // Флаг активной анимации
+        animationActive: false,
+        
+        // Ссылка на элемент счетчика шестерок
+        sixCounter: null
+    };
+    
+    // Добавляем CSS для анимаций
+    function addStyles() {
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+            /* Анимация "сгорания" шестерок */
+            @keyframes burnSixes {
+                0% { transform: scale(1); opacity: 1; text-shadow: 0 0 5px rgba(255, 165, 0, 0.7); }
+                50% { transform: scale(1.5); opacity: 0.7; text-shadow: 0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 100, 0, 0.7); }
+                100% { transform: scale(0.1); opacity: 0; text-shadow: 0 0 30px rgba(255, 0, 0, 0); }
+            }
+            
+            /* Анимация "возрождения" шестерок */
+            @keyframes reviveSixes {
+                0% { transform: scale(0.1); opacity: 0; filter: hue-rotate(0deg); }
+                50% { transform: scale(1.5); opacity: 0.9; filter: hue-rotate(180deg); text-shadow: 0 0 30px rgba(0, 191, 255, 0.9), 0 0 50px rgba(0, 191, 255, 0.7); }
+                100% { transform: scale(1); opacity: 1; filter: hue-rotate(360deg); text-shadow: 0 0 15px rgba(0, 191, 255, 0.8); }
+            }
+            
+            /* Анимации для заголовков и инструкций */
+            @keyframes headerFadeIn {
+                0% { opacity: 0; transform: translateY(-20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes instructionFadeIn {
+                0% { opacity: 0; transform: translateY(20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            
+            /* Элемент для отображения счетчика шестерок */
+            .six-counter {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: #ffcc00;
+                font-size: 18px;
+                padding: 5px 10px;
+                border-radius: 4px;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                box-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+                transition: all 0.3s ease;
+            }
+            
+            .six-counter .six-icon {
+                color: #ff9900;
+                font-weight: bold;
+            }
+            
+            /* Контейнер для анимации шестерок */
+            .dice-animation-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                background-color: rgba(0, 0, 0, 0.7);
+                opacity: 0;
+                transition: opacity 0.3s;
+                pointer-events: none;
+            }
+            
+            .dice-animation-container.active {
+                opacity: 1;
+            }
+            
+            /* Анимированные шестерки */
+            .animated-six {
+                font-size: 120px;
+                font-weight: bold;
+                margin: 0 20px;
+                position: relative;
+                color: #ffcc00;
+                transition: all 0.3s ease;
+            }
+            
+            .animated-six.burning {
+                animation: burnSixes 2s forwards;
+                color: #ff9900;
+            }
+            
+            .animated-six.reviving {
+                animation: reviveSixes 2.5s forwards;
+                color: #00bfff;
+            }
+            
+            /* Стили для частиц огня */
+            .fire-particle {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background-color: orange;
+                border-radius: 50%;
+                pointer-events: none;
+                opacity: 0.7;
+                z-index: -1;
+            }
+            
+            /* Стили для частиц воды */
+            .water-particle {
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background-color: #00bfff;
+                border-radius: 50%;
+                pointer-events: none;
+                opacity: 0.7;
+                z-index: -1;
+            }
+            
+            /* Анимация для частиц огня */
+            @keyframes fireParticleAnimation {
+                0% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+                100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+            }
+            
+            /* Анимация для частиц воды */
+            @keyframes waterParticleAnimation {
+                0% { transform: translate(0, 0) scale(0.5); opacity: 0.5; }
+                50% { transform: translate(calc(var(--x) * 0.5), calc(var(--y) * 0.5)) scale(1); opacity: 0.8; }
+                100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleElement);
+    }
+    
+    // Создаем счетчик шестерок
+    function createSixCounter() {
+        const counter = document.createElement('div');
+        counter.id = 'six-counter';
+        counter.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        `;
+        document.body.appendChild(counter);
+        state.sixCounter = counter;
+    }
+    
+    // Обновляем счетчик шестерок
+    function updateSixCounter(count) {
+        if (!state.sixCounter) return;
+        
+        // Показываем счетчик только если есть шестерки
+        if (count > 0) {
+            state.sixCounter.style.display = 'flex';
+            state.sixCounter.textContent = `6 × ${count}`;
+        } else {
+            // Скрываем счетчик, если нет шестерок
+            state.sixCounter.style.display = 'none';
+        }
+    }
+    
+    // Создаем контейнер для анимации шестерок
+    function createAnimationContainer() {
+        const container = document.createElement('div');
+        container.className = 'dice-animation-container';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // Создание частиц огня для эффекта сгорания
+    function createFireParticles(element) {
+        // Создаем 30-50 частиц огня
+        const particleCount = Math.floor(Math.random() * 20) + 30;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'fire-particle';
+            
+            // Случайный размер частицы
+            const size = Math.random() * 8 + 4; // 4-12px
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Случайная позиция вокруг элемента
+            const offsetX = Math.random() * 40 - 20; // -20px to +20px
+            const offsetY = Math.random() * 40 - 20; // -20px to +20px
+            particle.style.left = `calc(50% + ${offsetX}px)`;
+            particle.style.top = `calc(50% + ${offsetY}px)`;
+            
+            // Случайный цвет частицы (разные оттенки огня)
+            const hue = Math.floor(Math.random() * 30) + 10; // 10-40 (красный-оранжевый)
+            const saturation = Math.floor(Math.random() * 20) + 80; // 80-100%
+            const lightness = Math.floor(Math.random() * 20) + 50; // 50-70%
+            particle.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            
+            // Случайное направление и скорость движения
+            const x = Math.random() * 150 - 75; // -75px to +75px
+            const y = Math.random() * 150 - 75; // -75px to +75px
+            particle.style.setProperty('--x', `${x}px`);
+            particle.style.setProperty('--y', `${y}px`);
+            
+            // Длительность анимации
+            const duration = Math.random() * 1 + 1; // 1-2s
+            particle.style.animation = `fireParticleAnimation ${duration}s ease-out forwards`;
+            
+            // Добавляем частицу к элементу
+            element.appendChild(particle);
+            
+            // Удаляем частицу после завершения анимации
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+    }
+    
+    // Создание частиц воды/льда для эффекта возрождения
+    function createWaterParticles(element) {
+        // Создаем 30-50 частиц воды
+        const particleCount = Math.floor(Math.random() * 20) + 30;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'water-particle';
+            
+            // Случайный размер частицы
+            const size = Math.random() * 6 + 2; // 2-8px
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Случайная позиция вокруг элемента
+            const offsetX = Math.random() * 40 - 20; // -20px to +20px
+            const offsetY = Math.random() * 40 - 20; // -20px to +20px
+            particle.style.left = `calc(50% + ${offsetX}px)`;
+            particle.style.top = `calc(50% + ${offsetY}px)`;
+            
+            // Случайный цвет частицы (разные оттенки синего)
+            const hue = Math.floor(Math.random() * 40) + 190; // 190-230 (голубой-синий)
+            const saturation = Math.floor(Math.random() * 20) + 80; // 80-100%
+            const lightness = Math.floor(Math.random() * 20) + 50; // 50-70%
+            particle.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            
+            // Случайное направление и скорость движения
+            const x = Math.random() * 150 - 75; // -75px to +75px
+            const y = Math.random() * 150 - 75; // -75px to +75px
+            particle.style.setProperty('--x', `${x}px`);
+            particle.style.setProperty('--y', `${y}px`);
+            
+            // Длительность анимации
+            const duration = Math.random() * 1 + 1.5; // 1.5-2.5s
+            particle.style.animation = `waterParticleAnimation ${duration}s ease-out forwards`;
+            
+            // Добавляем частицу к элементу
+            element.appendChild(particle);
+            
+            // Удаляем частицу после завершения анимации
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+    }
+    
+    // Обновляем функцию анимации сгорания шестерок
+    function animateBurningSixes() {
+        state.animationActive = true;
+        
+        // Создаем/находим контейнер для анимации
+        let container = document.querySelector('.dice-animation-container');
+        if (!container) {
+            container = createAnimationContainer();
+        }
+        
+        // Очищаем контейнер
+        container.innerHTML = '';
+        
+        // Добавляем заголовок
+        const headerEl = document.createElement('div');
+        headerEl.className = 'animation-header';
+        headerEl.textContent = 'Три шестерки сгорают!';
+        headerEl.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6600;
+            text-shadow: 0 0 10px #ff9900, 0 0 20px #ffcc00;
+            opacity: 0;
+            animation: headerFadeIn 1s forwards;
+        `;
+        container.appendChild(headerEl);
+        
+        // Создаем контейнер для шестерок
+        const sixesContainer = document.createElement('div');
+        sixesContainer.className = 'sixes-container';
+        sixesContainer.style.cssText = `
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        `;
+        container.appendChild(sixesContainer);
+        
+        // Добавляем три шестерки
+        for (let i = 0; i < 3; i++) {
+            const six = document.createElement('div');
+            six.className = 'animated-six';
+            six.textContent = '6';
+            sixesContainer.appendChild(six);
+            
+            // Добавляем частицы огня с задержкой
+            setTimeout(() => {
+                createFireParticles(six);
+            }, i * 300);
+        }
+        
+        // Активируем контейнер
+        container.classList.add('active');
+        
+        // Запускаем анимацию горения с небольшой задержкой для каждой шестерки
+        const sixes = container.querySelectorAll('.animated-six');
+        sixes.forEach((six, index) => {
+            setTimeout(() => {
+                six.classList.add('burning');
+            }, index * 300);
+        });
+        
+        // После окончания анимации, скрываем контейнер
+        setTimeout(() => {
+            // Добавляем сообщение о том, что нужно бросать кубик снова
+            const instructionEl = document.createElement('div');
+            instructionEl.className = 'animation-instruction';
+            instructionEl.textContent = 'Бросайте кубик снова';
+            instructionEl.style.cssText = `
+                position: absolute;
+                bottom: 20%;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 24px;
+                color: #ffffff;
+                opacity: 0;
+                animation: instructionFadeIn 1s forwards;
+            `;
+            container.appendChild(instructionEl);
+            
+            // Через 1.5 секунды после инструкции скрываем контейнер
+        setTimeout(() => {
+            container.classList.remove('active');
+            state.animationActive = false;
+            
+            // Сообщаем об эффекте с помощью матричного комментатора
+            if (window.MatrixComments) {
+                window.MatrixComments.showMatrixMessage('Три шестерки сгорели! Бросайте кубик снова.');
+            }
+            }, 1500);
+        }, 2500);
+    }
+    
+    // Обновляем функцию анимации возрождения шестерок
+    function animateRevivingSixes() {
+        state.animationActive = true;
+        
+        // Создаем/находим контейнер для анимации
+        let container = document.querySelector('.dice-animation-container');
+        if (!container) {
+            container = createAnimationContainer();
+        }
+        
+        // Очищаем контейнер
+        container.innerHTML = '';
+        
+        // Добавляем заголовок
+        const headerEl = document.createElement('div');
+        headerEl.className = 'animation-header';
+        headerEl.textContent = 'Шестерки восстанавливаются!';
+        headerEl.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #00a2ff;
+            text-shadow: 0 0 10px #00d2ff, 0 0 20px #00e5ff;
+            opacity: 0;
+            animation: headerFadeIn 1s forwards;
+        `;
+        container.appendChild(headerEl);
+        
+        // Создаем контейнер для шестерок
+        const sixesContainer = document.createElement('div');
+        sixesContainer.className = 'sixes-container';
+        sixesContainer.style.cssText = `
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        `;
+        container.appendChild(sixesContainer);
+        
+        // Добавляем четыре шестерки
+        for (let i = 0; i < 4; i++) {
+            const six = document.createElement('div');
+            six.className = 'animated-six';
+            six.textContent = '6';
+            sixesContainer.appendChild(six);
+            
+            // Добавляем частицы воды с задержкой
+            setTimeout(() => {
+                createWaterParticles(six);
+            }, i * 300 + 500); // Добавляем дополнительную задержку, чтобы частицы появлялись при "возрождении"
+        }
+        
+        // Активируем контейнер
+        container.classList.add('active');
+        
+        // Запускаем анимацию возрождения с небольшой задержкой для каждой шестерки
+        const sixes = container.querySelectorAll('.animated-six');
+        sixes.forEach((six, index) => {
+            setTimeout(() => {
+                six.classList.add('reviving');
+            }, index * 300);
+        });
+        
+        // После окончания анимации, добавляем инструкцию и скрываем контейнер
+        setTimeout(() => {
+            // Добавляем сообщение о том, что нужно бросать кубик снова
+            const instructionEl = document.createElement('div');
+            instructionEl.className = 'animation-instruction';
+            instructionEl.textContent = 'У вас 4 шестерки! Бросайте снова';
+            instructionEl.style.cssText = `
+                position: absolute;
+                bottom: 20%;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 24px;
+                color: #ffffff;
+                opacity: 0;
+                animation: instructionFadeIn 1s forwards;
+            `;
+            container.appendChild(instructionEl);
+            
+            // Через 1.5 секунды после инструкции скрываем контейнер
+        setTimeout(() => {
+            container.classList.remove('active');
+            state.animationActive = false;
+            
+            // Сообщаем об эффекте с помощью матричного комментатора
+            if (window.MatrixComments) {
+                    window.MatrixComments.showMatrixMessage('Шестерки восстановились! У вас 4 шестерки! Бросайте снова.');
+            }
+            }, 1500);
+        }, 3000);
+    }
+    
+    // Обработка всех шестерок и перемещение фигуры
+    function processSixSequence(diceValues) {
+        const currentPosition = window.currentPosition || 0;
+        console.log(`Обработка последовательности: ${diceValues.join(', ')}`);
+        
+        // Формируем строку комбинации для комментатора (например, "6-6-3")
+        const combinationString = diceValues.join('-');
+        
+        // Сообщаем о начале последовательности ходов только один раз
+        if (window.MatrixComments) {
+            const lastDiceValue = diceValues[diceValues.length - 1];
+            window.MatrixComments.showMatrixMessage(`Выпало ${lastDiceValue}, общее число ${combinationString}`);
+            
+            // Даем игроку время прочитать сообщение о комбинации
+            setTimeout(() => {
+                // Последовательно обрабатываем каждое значение кубика
+                processNextDiceValue(diceValues, 0, currentPosition);
+            }, 3000);
+        } else {
+            // Если комментатор недоступен, просто начинаем обработку
+            processNextDiceValue(diceValues, 0, currentPosition);
+        }
+    }
+    
+    // Функция для последовательной обработки каждого значения кубика
+    function processNextDiceValue(diceValues, index, currentPosition) {
+        // Проверяем, есть ли еще значения для обработки
+        if (index >= diceValues.length) {
+            // Все значения обработаны, сбрасываем последовательность
+            state.diceSequence = [];
+            updateSixCounter(0);
+            return;
+        }
+        
+        // Текущее значение кубика
+        const diceValue = diceValues[index];
+        
+        // Вычисляем новую позицию
+        const newPosition = currentPosition + diceValue;
+        
+        // Формируем комбинацию для комментатора
+        let combinationMessage = "";
+        for (let i = 0; i < diceValues.length; i++) {
+            if (i > 0) combinationMessage += "-";
+            
+            if (i < index) {
+                // Зачеркиваем уже пройденные значения
+                combinationMessage += `<span style="text-decoration: line-through;">${diceValues[i]}</span>`;
+            } else {
+                combinationMessage += diceValues[i];
+            }
+        }
+        
+        // Сначала показываем сообщение о текущем ходе
+        if (window.MatrixComments) {
+            if (index > 0) {
+                window.MatrixComments.showMatrixMessage(`Продолжаем ход, ходим ${combinationMessage}`);
+            } else {
+                window.MatrixComments.showMatrixMessage(`Ходим ${combinationMessage}`);
+            }
+        }
+        
+        // Ждем 2 секунды, чтобы игрок успел прочитать сообщение
+        setTimeout(() => {
+            // Перемещаем фишку на новую позицию
+            window.currentPosition = newPosition;
+            window.movePlayer(newPosition);
+            
+            // Обновляем Мистера Прозрачного, если он есть
+            if (window.MisterTransparent && typeof window.MisterTransparent.update === 'function') {
+                window.MisterTransparent.update(newPosition);
+            }
+            
+            // Инициализируем объект specialMoves, если он еще не определен
+            if (!window.specialMoves) {
+                console.log("Инициализация объекта specialMoves");
+                window.specialMoves = {
+                    // Стрелы (лестницы, ведущие вверх)
+                    10: 23, 17: 69, 20: 32, 22: 60, 27: 41, 28: 50, 37: 66, 45: 67, 46: 62, 54: 68,
+                    // Змеи (ведущие вниз)
+                    12: 8, 16: 4, 24: 7, 29: 6, 44: 9, 52: 35, 55: 3, 61: 13, 63: 2, 72: 51
+                };
+            }
+            
+            // Выводим отладочную информацию
+            console.log(`Проверка специального перемещения для клетки ${newPosition}:`);
+            console.log(`specialMoves существует: ${typeof window.specialMoves === 'object'}`);
+            if (typeof window.specialMoves === 'object') {
+                console.log(`specialMoves для клетки ${newPosition}: ${window.specialMoves[newPosition]}`);
+                console.log(`Ключи в specialMoves: ${Object.keys(window.specialMoves).join(', ')}`);
+            }
+            
+            // Специально обрабатываем клетку 17, которая должна переходить на 69
+            let hasSpecialMove = false;
+            let specialDestination = null;
+            
+            if (newPosition === 17) {
+                console.log("Специальная обработка для клетки 17");
+                specialDestination = 69; // Жестко задаем перемещение для клетки 17
+                hasSpecialMove = true;
+            } else {
+                // Общая проверка для других клеток
+                hasSpecialMove = typeof window.specialMoves === 'object' && window.specialMoves.hasOwnProperty(newPosition.toString());
+                specialDestination = hasSpecialMove ? window.specialMoves[newPosition] : null;
+            }
+            
+            if (hasSpecialMove && specialDestination) {
+                // Определяем тип специального перемещения (змея или стрела)
+                const isSnake = specialDestination < newPosition;
+                
+                // Сообщаем о специальном перемещении
+                if (window.MatrixComments) {
+                    if (isSnake) {
+                        window.MatrixComments.showMatrixMessage(`Вы попали на змею! Спуск с клетки ${newPosition} на клетку ${specialDestination}.`);
+                    } else {
+                        window.MatrixComments.showMatrixMessage(`Вы попали на стрелу! Подъём с клетки ${newPosition} на клетку ${specialDestination}.`);
+                    }
+                }
+                
+                // Запускаем анимацию змеи или стрелы
+                if (isSnake && typeof window.showSnakeAnimation === 'function') {
+                    window.showSnakeAnimation(newPosition, specialDestination);
+                } else if (!isSnake && typeof window.showArrowAnimation === 'function') {
+                    window.showArrowAnimation(newPosition, specialDestination);
+                }
+                
+                // Через 3 секунды перемещаем фишку по змее/стреле
+                setTimeout(() => {
+                    // Перемещаем фишку на конечную позицию
+                    window.currentPosition = specialDestination;
+                    window.movePlayer(specialDestination);
+                    
+                    // Обновляем Мистера Прозрачного, если он есть
+                    if (window.MisterTransparent && typeof window.MisterTransparent.update === 'function') {
+                        window.MisterTransparent.update(specialDestination);
+                    }
+                    
+                    // Через 2.5 секунды после специального перемещения, продолжаем последовательность
+                    setTimeout(() => {
+                        // После того как отработала анимация змеи/стрелы, проверяем, есть ли ещё значения
+                        if (index + 1 < diceValues.length) {
+                            // Переходим к следующему значению с задержкой 3 секунды
+                            setTimeout(() => {
+                                processNextDiceValue(diceValues, index + 1, specialDestination);
+                            }, 3000);
+                        } else {
+                            // Формируем финальное сообщение с зачеркнутыми значениями
+                            let finalMessage = "";
+                            for (let i = 0; i < diceValues.length; i++) {
+                                if (i > 0) finalMessage += "-";
+                                // Зачеркиваем все значения в финальном сообщении
+                                finalMessage += `<span style="text-decoration: line-through;">${diceValues[i]}</span>`;
+                            }
+                            
+                            // Показываем финальное сообщение с зачеркнутой комбинацией
+                            window.MatrixComments.showMatrixMessage(`Ход завершен: ${finalMessage}`);
+                            
+                            // Сбрасываем последовательность
+                            state.diceSequence = [];
+                            updateSixCounter(0);
+                        }
+                    }, 2500);
+                }, 3000);
+            } else {
+                // Если только что закончилось перемещение на последнее значение
+                if (index + 1 >= diceValues.length) {
+                    // Формируем финальное сообщение с зачеркнутыми значениями
+                    let finalMessage = "";
+                    for (let i = 0; i < diceValues.length; i++) {
+                        if (i > 0) finalMessage += "-";
+                        // Зачеркиваем все значения в финальном сообщении
+                        finalMessage += `<span style="text-decoration: line-through;">${diceValues[i]}</span>`;
+                    }
+                    
+                    // Показываем финальное сообщение с зачеркнутой комбинацией
+                    setTimeout(() => {
+                        window.MatrixComments.showMatrixMessage(`Ход завершен: ${finalMessage}`);
+                        
+                        // Сбрасываем последовательность
+                        state.diceSequence = [];
+                        updateSixCounter(0);
+                    }, 1500);
+                } else {
+                    // Ждем 3 секунды и переходим к следующему значению
+                    setTimeout(() => {
+                        processNextDiceValue(diceValues, index + 1, newPosition);
+                    }, 3000);
+                }
+            }
+            
+            // Если достигли клетки 68, завершаем игру
+            if (newPosition === 68 || (hasSpecialMove && specialDestination === 68)) {
+                // Даже если в комбинации остались значения, игра завершается
+                setTimeout(() => {
+                    // Если есть функция завершения игры, вызываем ее
+                    if (typeof window.createGoldenEffect68 === 'function') {
+                        window.createGoldenEffect68();
+                    }
+                    
+                    // Сбрасываем последовательность
+                    state.diceSequence = [];
+                    updateSixCounter(0);
+                }, 2000);
+                
+                return;
+            }
+        }, 2000); // Начальная задержка перед перемещением фишки
+    }
+    
+    // Основная функция обработки броска кубика
+    function handleDiceRoll(diceValue) {
+        // Пропускаем обработку, если активна анимация
+        if (state.animationActive) return false;
+        
+        console.log(`Обработка броска кубика: ${diceValue}`);
+        
+        // Если игра еще не началась и выпала не 6, выходим
+        if ((window.currentPosition === 0 || !window.currentPosition) && diceValue !== 6) {
+            return true; // Стандартная обработка
+        }
+        
+        // Если игра еще не началась и выпала 6, стандартная обработка
+        if ((window.currentPosition === 0 || !window.currentPosition) && diceValue === 6) {
+            return true; // Стандартная обработка в processGameLogic
+        }
+        
+        // Если выпала 6, добавляем в последовательность и запрашиваем новый бросок
+        if (diceValue === 6) {
+            state.diceSequence.push(diceValue);
+            state.totalSixesCounter++;
+            
+            // Обновляем счетчик шестерок после добавления новой шестерки
+            updateSixCounter(state.diceSequence.length);
+            
+            console.log(`Выпала шестерка! Текущая последовательность: ${state.diceSequence.length}`);
+            
+            // Проверяем, накопились ли три шестерки подряд и они еще не "сгорели"
+            if (state.diceSequence.length === 3 && !state.sixesBurned) {
+                console.log("Три шестерки подряд! Активируем анимацию сгорания.");
+                // Три шестерки "сгорают"
+                animateBurningSixes();
+                state.sixesBurned = true;
+                state.diceSequence = [];
+                updateSixCounter(state.diceSequence.length); // Обновляем счетчик после сброса последовательности
+                
+                // Сообщение для матричного комментатора
+                if (window.MatrixComments) {
+                    window.MatrixComments.showMatrixMessage(`Выпало три шестерки подряд! Они сгорают! Бросайте кубик снова...`);
+                }
+                
+                return false; // Блокируем стандартную обработку хода
+            }
+            
+            // Если шестерки уже "сгорели" и выпала ещё одна - "возрождение"
+            if (state.sixesBurned && state.diceSequence.length === 1) {
+                console.log("Выпала шестерка после сгорания! Активируем анимацию возрождения.");
+                animateRevivingSixes();
+                state.sixesBurned = false;
+                state.diceSequence = [6, 6, 6, 6]; // Возвращаем все четыре шестерки
+                
+                // Сообщение для матричного комментатора
+                if (window.MatrixComments) {
+                    window.MatrixComments.showMatrixMessage(`Выпала шестерка! Все сгоревшие шестерки восстанавливаются! У вас теперь четыре шестерки! Бросайте снова.`);
+                }
+                
+                return false; // Блокируем стандартную обработку хода
+            }
+            
+            // Обновляем информацию в матричном комментаторе
+            if (window.MatrixComments) {
+                // Показываем текущую комбинацию шестерок
+                const sequenceStr = state.diceSequence.join('-');
+                
+                if (state.diceSequence.length === 1) {
+                    window.MatrixComments.showMatrixMessage(`Выпала шестерка! Бросайте кубик снова.`);
+                } else if (state.diceSequence.length === 2) {
+                    window.MatrixComments.showMatrixMessage(`Выпала вторая шестерка! Текущая комбинация: ${sequenceStr}. Бросайте кубик снова.`);
+                }
+            }
+            
+            return false; // Блокируем стандартную обработку хода - пусть игрок бросает снова
+        } else {
+            // Если выпало не 6
+            console.log(`Выпало число ${diceValue}. Проверяем последовательность шестерок.`);
+            
+            // Если были накопленные шестерки и они не сгорели
+            if (state.diceSequence.length > 0 && !state.sixesBurned) {
+                // Добавляем текущее значение в последовательность
+                state.diceSequence.push(diceValue);
+                
+                console.log(`Выпало ${diceValue} после ${state.diceSequence.length-1} шестерок.`);
+                
+                // Обрабатываем всю последовательность
+                processSixSequence(state.diceSequence);
+                
+                return false; // Блокируем стандартную обработку, так как наш код уже обработал ход
+            }
+            
+            // Если шестерки были сожжены и выпало не 6, сбросим флаг sixesBurned и сообщим об этом
+            if (state.sixesBurned) {
+                console.log("Выпало не 6 после сгорания шестерок. Ходим на выпавшее значение.");
+                state.sixesBurned = false;
+                
+                // Сообщаем в комментаторе
+                if (window.MatrixComments) {
+                    window.MatrixComments.showMatrixMessage(`Выпало ${diceValue}. Ходим на ${diceValue} клеток.`);
+                }
+            }
+            
+            // Сбрасываем последовательность и обновляем счетчик
+            state.diceSequence = [];
+            updateSixCounter(0);
+            
+            // Стандартная обработка для броска не-6
+            return true;
+        }
+    }
+    
+    // Функция перехвата броска кубика
+    function interceptDiceRoll() {
+        // Проверяем наличие функции processGameLogic
+        if (typeof window.processGameLogic === 'function') {
+            const originalProcessGameLogic = window.processGameLogic;
+            
+            window.processGameLogic = function(diceValue) {
+                console.log(`Перехваченный бросок кубика: ${diceValue}`);
+                
+                // Обрабатываем бросок через наш обработчик последовательностей
+                const shouldContinue = handleDiceRoll(diceValue);
+                
+                // Если разрешено продолжить стандартную обработку, вызываем оригинальную функцию
+                if (shouldContinue) {
+                    return originalProcessGameLogic(diceValue);
+                }
+            };
+            
+            console.log("Функция processGameLogic успешно перехвачена для обработки последовательностей шестерок");
+        } else {
+            console.warn("Функция processGameLogic не найдена, обработка последовательностей шестерок не будет работать");
+        }
+    }
+    
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Инициализация обработчика последовательностей кубика...");
+        
+        // Добавляем стили
+        addStyles();
+        
+        // Создаем счетчик шестерок
+        createSixCounter();
+        
+        // Создаем контейнер для анимации
+        createAnimationContainer();
+        
+        // Перехватываем бросок кубика с небольшой задержкой
+        setTimeout(interceptDiceRoll, 1000);
+        
+        // Добавляем обработчик события для броска кубика
+        document.addEventListener('diceRoll', function(e) {
+            if (e.detail && typeof e.detail.result !== 'undefined') {
+                handleDiceRoll(e.detail.result);
+            }
+        });
+        
+        document.addEventListener('diceRolled', function(e) {
+            if (e.detail && typeof e.detail.value !== 'undefined') {
+                handleDiceRoll(e.detail.value);
+            }
+        });
+        
+        console.log("Обработчик последовательностей кубика инициализирован");
+    });
+    
+    // Экспортируем функции для внешнего использования
+    window.DiceSequenceHandler = {
+        reset: function() {
+            state.diceSequence = [];
+            state.sixesBurned = false;
+            // updateSixCounter(0); // ВРЕМЕННО ОТКЛЮЧЕНО
+        },
+        getState: function() {
+            return { ...state };
+        }
+    };
+})(); 
